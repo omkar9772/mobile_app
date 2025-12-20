@@ -18,7 +18,8 @@ class RaceService {
       }
 
       final response = await _apiService.get(endpoint);
-      final data = _apiService.handleListResponse(response);
+      final responseData = _apiService.handleResponse(response);
+      final data = responseData['data'] as List;
 
       return data.map((json) => Race.fromJson(json)).toList();
     } catch (e) {
@@ -30,7 +31,8 @@ class RaceService {
     try {
       final endpoint = '${AppConfig.publicRecentRaces}?limit=$limit';
       final response = await _apiService.get(endpoint);
-      final data = _apiService.handleListResponse(response);
+      final responseData = _apiService.handleResponse(response);
+      final data = responseData['data'] as List;
 
       return data.map((json) => Race.fromJson(json)).toList();
     } catch (e) {
@@ -42,7 +44,8 @@ class RaceService {
     try {
       final endpoint = '${AppConfig.publicUpcomingRaces}?limit=$limit';
       final response = await _apiService.get(endpoint);
-      final data = _apiService.handleListResponse(response);
+      final responseData = _apiService.handleResponse(response);
+      final data = responseData['data'] as List;
 
       return data.map((json) => Race.fromJson(json)).toList();
     } catch (e) {
@@ -59,6 +62,50 @@ class RaceService {
       return Race.fromJson(data);
     } catch (e) {
       throw Exception('Failed to load race details: $e');
+    }
+  }
+
+  Future<List<RaceDay>> getRaceDays(String raceId, {int? skip, int? limit}) async {
+    try {
+      String endpoint = '/public/races/$raceId/days';
+      List<String> queryParams = [];
+
+      if (skip != null) queryParams.add('skip=$skip');
+      if (limit != null) queryParams.add('limit=$limit');
+
+      if (queryParams.isNotEmpty) {
+        endpoint += '?${queryParams.join('&')}';
+      }
+
+      final response = await _apiService.get(endpoint);
+      final responseData = _apiService.handleResponse(response);
+      final data = responseData['data'] as List;
+
+      return data.map((json) => RaceDay.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to load race days: $e');
+    }
+  }
+
+  Future<List<RaceResult>> getDayResults(String dayId, {int? skip, int? limit}) async {
+    try {
+      String endpoint = '/public/races/days/$dayId/results';
+      List<String> queryParams = [];
+
+      if (skip != null) queryParams.add('skip=$skip');
+      if (limit != null) queryParams.add('limit=$limit');
+
+      if (queryParams.isNotEmpty) {
+        endpoint += '?${queryParams.join('&')}';
+      }
+
+      final response = await _apiService.get(endpoint);
+      final responseData = _apiService.handleResponse(response);
+      final data = responseData['data'] as List;
+
+      return data.map((json) => RaceResult.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to load day results: $e');
     }
   }
 }

@@ -71,11 +71,11 @@ class RaceDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date & Time
+                  // Date Range
                   _buildDetailRow(
                     Icons.calendar_today,
-                    'Date',
-                    DateHelper.formatDate(race.raceDate),
+                    'Dates',
+                    '${DateHelper.formatDate(race.startDate)} - ${DateHelper.formatDate(race.endDate)}',
                   ),
                   const SizedBox(height: AppTheme.spacingMd),
 
@@ -97,14 +97,6 @@ class RaceDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppTheme.spacingMd),
 
-                  // Participants
-                  _buildDetailRow(
-                    Icons.groups,
-                    'Participants',
-                    '${race.totalParticipants}',
-                  ),
-                  const SizedBox(height: AppTheme.spacingMd),
-
                   // Description
                   if (race.description != null && race.description!.isNotEmpty) ...[
                     const Text(
@@ -116,68 +108,6 @@ class RaceDetailScreen extends StatelessWidget {
                       race.description!,
                       style: AppTheme.bodyMedium,
                     ),
-                    const SizedBox(height: AppTheme.spacingLg),
-                  ],
-
-                  // Results
-                  if (race.results != null && race.results!.isNotEmpty) ...[
-                    const Text(
-                      'Results',
-                      style: AppTheme.heading3,
-                    ),
-                    const SizedBox(height: AppTheme.spacingMd),
-                    ...race.results!.asMap().entries.map((entry) {
-                      final result = entry.value;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: AppTheme.spacingSm),
-                        child: ListTile(
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: result.position == 1
-                                  ? const Color(0xFFFFD700)
-                                  : result.position == 2
-                                      ? const Color(0xFFC0C0C0)
-                                      : result.position == 3
-                                          ? const Color(0xFFCD7F32)
-                                          : AppTheme.backgroundLight,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${result.position}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: result.position <= 3
-                                      ? Colors.white
-                                      : AppTheme.textDark,
-                                ),
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            result.bullName ?? 'Bull #${result.bullId}',
-                            style: AppTheme.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            result.ownerName ?? 'Unknown Owner',
-                            style: AppTheme.bodySmall,
-                          ),
-                          trailing: result.timeMilliseconds != null
-                              ? Text(
-                                  result.getFormattedTime(),
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primaryOrange,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      );
-                    }).toList(),
                   ],
                 ],
               ),

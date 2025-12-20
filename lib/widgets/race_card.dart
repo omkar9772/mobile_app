@@ -17,127 +17,172 @@ class RaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppTheme.spacingMd),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spacingMd),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Status Badge
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isRecent
-                      ? AppTheme.successGreen.withOpacity(0.1)
-                      : AppTheme.infoBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                ),
-                child: Icon(
-                  isRecent ? Icons.check_circle : Icons.schedule,
-                  color: isRecent ? AppTheme.successGreen : AppTheme.infoBlue,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppTheme.spacingMd),
-
-              // Race Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Race Name
-                    Text(
-                      race.name,
-                      style: AppTheme.heading3,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          highlightColor: AppTheme.primaryOrange.withOpacity(0.05),
+          splashColor: AppTheme.primaryOrange.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon Container
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isRecent
+                          ? [
+                              AppTheme.successGreen.withOpacity(0.15),
+                              AppTheme.successGreen.withOpacity(0.05)
+                            ]
+                          : [
+                              AppTheme.primaryOrange.withOpacity(0.15),
+                              AppTheme.primaryOrange.withOpacity(0.05)
+                            ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(height: AppTheme.spacingXs),
-
-                    // Date
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: AppTheme.textLight,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          DateHelper.formatDate(race.raceDate),
-                          style: AppTheme.bodySmall,
-                        ),
-                      ],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isRecent
+                          ? AppTheme.successGreen.withOpacity(0.2)
+                          : AppTheme.primaryOrange.withOpacity(0.2),
+                      width: 1,
                     ),
-                    const SizedBox(height: AppTheme.spacingXs),
+                  ),
+                  child: Icon(
+                    isRecent ? Icons.emoji_events_outlined : Icons.calendar_month_outlined,
+                    color: isRecent ? AppTheme.successGreen : AppTheme.primaryOrange,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 16),
 
-                    // Location
-                    if (race.address.isNotEmpty)
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Text(
+                        race.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Metadata Rows
                       Row(
                         children: [
-                          const Icon(
-                            Icons.location_on,
-                            size: 14,
-                            color: AppTheme.textLight,
-                          ),
-                          const SizedBox(width: 4),
+                          Icon(Icons.calendar_today, 
+                              size: 14, color: Colors.grey.shade500),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              race.address,
-                              style: AppTheme.bodySmall,
+                              '${DateHelper.formatDate(race.startDate)} - ${DateHelper.formatDate(race.endDate)}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                  ],
+                      if (race.address.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_outlined, 
+                                size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                race.address,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppTheme.spacingSm),
 
-              // Countdown/Status Badge
-              if (!isRecent)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.infoBlue,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    DateHelper.getCountdownBadge(race.raceDate),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                // Status/Countdown Badge
+                if (!isRecent)
+                  Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryOrange,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryOrange.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.successGreen,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-            ],
+                    child: Text(
+                      DateHelper.getCountdownBadge(race.startDate),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                   // Subtle checkbox for completed
+                   Container(
+                     margin: const EdgeInsets.only(left: 8),
+                     padding: const EdgeInsets.all(6),
+                     decoration: BoxDecoration(
+                       shape: BoxShape.circle,
+                       color: AppTheme.successGreen.withOpacity(0.1),
+                     ),
+                     child: const Icon(
+                       Icons.check_circle,
+                       color: AppTheme.successGreen,
+                       size: 18,
+                     ),
+                   )
+              ],
+            ),
           ),
         ),
       ),

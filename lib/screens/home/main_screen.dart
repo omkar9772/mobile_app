@@ -3,7 +3,12 @@ import '../../config/theme.dart';
 import 'home_tab.dart';
 import '../races/races_screen.dart';
 import '../bulls/bulls_screen.dart';
+import '../marketplace/available_bulls_screen.dart';
+import 'package:provider/provider.dart';
 import '../profile/profile_screen.dart';
+import '../../providers/race_provider.dart';
+import '../../providers/bull_provider.dart';
+import '../../providers/marketplace_provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeTab(),
     const RacesScreen(),
     const BullsScreen(),
+    const AvailableBullsScreen(),
     const ProfileScreen(),
   ];
 
@@ -26,12 +32,46 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Lazy load data based on tab selection
+    switch (index) {
+      case 0: // Home
+        final raceProvider = context.read<RaceProvider>();
+        if (!raceProvider.isLoadedHome) {
+          raceProvider.loadHomeRaces();
+        }
+        break;
+      case 1: // Races
+        final raceProvider = context.read<RaceProvider>();
+        if (!raceProvider.isLoadedAll) {
+          raceProvider.loadAllRaces();
+        }
+        break;
+      case 2: // Bulls
+        final bullProvider = context.read<BullProvider>();
+        if (!bullProvider.isLoaded) {
+          bullProvider.loadBulls();
+        }
+        break;
+      case 3: // Available Bulls (Marketplace)
+        final marketplaceProvider = context.read<MarketplaceProvider>();
+        if (!marketplaceProvider.isLoaded) {
+          marketplaceProvider.loadListings();
+        }
+        break;
+      case 4: // Profile
+        // Profile data usually loaded on app start or handled within screen
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -51,6 +91,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.pets),
             label: 'Bulls',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.volunteer_activism),
+            label: 'Available',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

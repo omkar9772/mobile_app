@@ -40,11 +40,8 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(AppConfig.tokenKey, authResponse.accessToken);
 
-      // Store user info (username from request)
-      await prefs.setString(
-        AppConfig.userKey,
-        jsonEncode({'username': request.username}),
-      );
+      // Fetch and store full user profile from backend
+      await getCurrentUserFromApi();
 
       return authResponse;
     } catch (e) {

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app_links/app_links.dart';
 import 'config/theme.dart';
+import 'package:provider/provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/main_screen.dart';
+import 'screens/bulls/bull_detail_screen.dart';
 import 'services/auth_service.dart';
+import 'services/bull_service.dart';
+import 'models/bull.dart';
+import 'providers/auth_provider.dart';
+import 'providers/bull_provider.dart';
+import 'providers/race_provider.dart';
+import 'providers/marketplace_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,20 +25,106 @@ void main() {
     ),
   );
 
-  runApp(const NaadBailgadaApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => BullProvider()),
+        ChangeNotifierProvider(create: (_) => RaceProvider()),
+        ChangeNotifierProvider(create: (_) => MarketplaceProvider()),
+      ],
+      child: const NaadBailgadaApp(),
+    ),
+  );
 }
 
-class NaadBailgadaApp extends StatelessWidget {
+class NaadBailgadaApp extends StatefulWidget {
   const NaadBailgadaApp({super.key});
+
+  @override
+  State<NaadBailgadaApp> createState() => _NaadBailgadaAppState();
+}
+
+class _NaadBailgadaAppState extends State<NaadBailgadaApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  late AppLinks _appLinks;
+  final BullService _bullService = BullService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
+
+    // Handle links when app is already running
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+
+    // Handle initial link if app was opened from a deep link
+    try {
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        _handleDeepLink(initialUri);
+      }
+    } catch (e) {
+      // Handle error
+      debugPrint('Error getting initial link: $e');
+    }
+  }
+
+  Future<void> _handleDeepLink(Uri uri) async {
+    // Check if the scheme is 'naad' and path matches bull profile
+    if (uri.scheme == 'naad' && uri.host == 'bull') {
+      // Extract bull ID from path (e.g., naad://bull/123)
+      final bullId = uri.pathSegments.isNotEmpty ? uri.pathSegments[0] : null;
+
+      if (bullId != null) {
+        try {
+          // Fetch the bull details
+          final bull = await _bullService.getBullById(bullId);
+
+          // Navigate to bull detail screen
+          _navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => BullDetailScreen(bull: bull),
+            ),
+          );
+        } catch (e) {
+          debugPrint('Error loading bull: $e');
+          // Show error message to user
+          _navigatorKey.currentState?.context.let((context) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Unable to load bull profile. Please try again.'),
+              ),
+            );
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'Naad Bailgada',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
+  }
+}
+
+extension _ContextExtension on BuildContext? {
+  void let(void Function(BuildContext context) block) {
+    if (this != null) {
+      block(this!);
+    }
   }
 }
 

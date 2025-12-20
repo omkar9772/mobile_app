@@ -1,5 +1,10 @@
 class AppConfig {
   // API Configuration
+  // IMPORTANT: Update this URL to match your backend deployment
+  // Examples:
+  //   - Local development: 'http://localhost:8000/api/v1'
+  //   - Android emulator: 'http://10.0.2.2:8000/api/v1'
+  //   - Production: 'https://your-backend-url.com/api/v1'
   static const String apiBaseUrl = 'http://localhost:8000/api/v1';
 
   // Endpoints
@@ -14,6 +19,11 @@ class AppConfig {
   static const String publicRaceDetail = '/public/races';
   static const String publicBulls = '/public/bulls';
   static const String publicBullDetail = '/public/bulls';
+  static const String publicSearch = '/public/search';
+  static const String publicUserBullsSell = '/public/user-bulls-sell';
+
+  // User Bulls for Sale
+  static const String userBulls = '/user/bulls';
 
   // Pagination
   static const int itemsPerPage = 50;
@@ -23,4 +33,8 @@ class AppConfig {
   // Storage Keys
   static const String tokenKey = 'naad_auth_token';
   static const String userKey = 'naad_user';
+
+  // Environment helpers
+  static bool get isLocalDevelopment => apiBaseUrl.contains('localhost') || apiBaseUrl.contains('127.0.0.1');
+  static bool get isProduction => !isLocalDevelopment;
 }

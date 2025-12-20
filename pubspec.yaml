@@ -50,6 +50,25 @@ dependencies:
   # Cached network images
   cached_network_image: ^3.3.1
 
+  # URL launcher for phone calls
+  url_launcher: ^6.2.2
+
+  # Image picker for user bull images
+  image_picker: ^1.0.7
+
+  # Image cropper for 1:1 aspect ratio cropping
+  image_cropper: ^8.0.2
+
+  # Path utilities for file extension extraction
+  path: ^1.9.0
+
+  # Share functionality
+  share_plus: ^10.1.3
+
+  # Deep linking
+  app_links: ^6.3.3
+  font_awesome_flutter: ^10.12.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
