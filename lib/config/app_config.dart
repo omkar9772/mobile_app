@@ -20,6 +20,8 @@ class AppConfig {
   static const String publicRaceDetail = '/public/races';
   static const String publicBulls = '/public/bulls';
   static const String publicBullDetail = '/public/bulls';
+  static const String publicOwners = '/public/owners';
+  static const String publicOwnerDetail = '/public/owners';
   static const String publicSearch = '/public/search';
   static const String publicUserBullsSell = '/public/user-bulls-sell';
 

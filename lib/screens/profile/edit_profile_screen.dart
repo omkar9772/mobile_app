@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/language_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -64,9 +65,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await context.read<AuthProvider>().updateProfile(request);
 
       if (mounted) {
+        final lang = context.read<LanguageProvider>();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
+          SnackBar(
+            content: Text(lang.getText('profile_updated')),
             backgroundColor: AppTheme.successGreen,
           ),
         );
@@ -82,9 +84,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(lang.getText('edit_profile')),
         backgroundColor: AppTheme.primaryOrange,
         foregroundColor: Colors.white,
       ),
@@ -101,14 +104,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 color: AppTheme.primaryOrange,
               ),
               const SizedBox(height: AppTheme.spacingLg),
-              const Text(
-                'Update Your Profile',
+              Text(
+                lang.getText('update_your_profile'),
                 textAlign: TextAlign.center,
                 style: AppTheme.heading2,
               ),
               const SizedBox(height: AppTheme.spacingSm),
-              const Text(
-                'Edit your personal information',
+              Text(
+                lang.getText('edit_personal_info'),
                 textAlign: TextAlign.center,
                 style: AppTheme.bodyMedium,
               ),
@@ -117,20 +120,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Username
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  prefixIcon: Icon(Icons.person),
-                  helperText: 'Must be unique',
+                decoration: InputDecoration(
+                  labelText: lang.getText('username'),
+                  prefixIcon: const Icon(Icons.person),
+                  helperText: lang.getText('must_be_unique'),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter username';
+                    return lang.getText('enter_username');
                   }
                   if (value.trim().length < 3) {
-                    return 'Username must be at least 3 characters';
+                    return lang.getText('username_min_3');
                   }
                   if (value.trim().length > 50) {
-                    return 'Username must not exceed 50 characters';
+                    return lang.getText('username_max_50');
                   }
                   return null;
                 },
@@ -140,17 +143,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Email
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
+                decoration: InputDecoration(
+                  labelText: lang.getText('email'),
+                  prefixIcon: const Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter email';
+                    return lang.getText('enter_email');
                   }
                   if (!value.contains('@')) {
-                    return 'Please enter a valid email';
+                    return lang.getText('valid_email');
                   }
                   return null;
                 },
@@ -160,9 +163,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Full Name
               TextFormField(
                 controller: _fullNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name (Optional)',
-                  prefixIcon: Icon(Icons.badge),
+                decoration: InputDecoration(
+                  labelText: lang.getText('full_name_optional'),
+                  prefixIcon: const Icon(Icons.badge),
                 ),
               ),
               const SizedBox(height: AppTheme.spacingMd),
@@ -170,9 +173,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Phone
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone (Optional)',
-                  prefixIcon: Icon(Icons.phone),
+                decoration: InputDecoration(
+                  labelText: lang.getText('phone_optional'),
+                  prefixIcon: const Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -208,7 +211,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text('Update Profile'),
+                    : Text(lang.getText('update_profile')),
               ),
             ],
           ),

@@ -4,11 +4,13 @@ import '../../config/theme.dart';
 import '../../models/race.dart';
 import '../../models/user.dart';
 import '../../widgets/race_card.dart';
+import '../../widgets/banner_carousel.dart';
 import '../auth/login_screen.dart';
 import '../races/race_days_screen.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/race_provider.dart';
-import 'dart:ui'; // Extended imports for UI polish if needed
+import 'dart:ui';
+import '../../providers/language_provider.dart'; // Extended imports for UI polish if needed
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -30,21 +32,24 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _handleLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final lang = context.read<LanguageProvider>();
+        return AlertDialog(
+          title: Text(lang.getText('logout_confirm_title')),
+          content: Text(lang.getText('logout_confirm_msg')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(lang.getText('cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
+              child: Text(lang.getText('logout')),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true) {
@@ -89,17 +94,29 @@ class _HomeTabState extends State<HomeTab> {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       const SizedBox(height: 24),
-                      
+
+                      // Banner Carousel - Show login prompt only if not logged in
+                      BannerCarousel(
+                        showLoginPrompt: currentUser == null,
+                        onLoginTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 32),
+
                       // Recent Races Section
                       if (recentRaces.isNotEmpty) ...[
-                        _buildSectionHeader('Recent Results', Icons.emoji_events_outlined),
+                        _buildSectionHeader(context.watch<LanguageProvider>().getText('recent_results'), Icons.emoji_events_outlined),
                         _buildRaceList(recentRaces, isRecent: true),
                         const SizedBox(height: 32),
                       ],
 
                       // Upcoming Races Section
                       if (upcomingRaces.isNotEmpty) ...[
-                        _buildSectionHeader('Upcoming Races', Icons.calendar_month_outlined),
+                        _buildSectionHeader(context.watch<LanguageProvider>().getText('upcoming_races'), Icons.calendar_month_outlined),
                         _buildRaceList(upcomingRaces, isRecent: false),
                       ],
 
@@ -125,11 +142,8 @@ class _HomeTabState extends State<HomeTab> {
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFFF6B35), Color(0xFFFF8C61), Color(0xFFFFC043)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppTheme.primaryOrange,
+
           ),
           child: Stack(
             children: [
@@ -168,22 +182,26 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'Welcome back, ${currentUser?.username ?? "User"} 👋',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                    // Show welcome message only if logged in
+                    if (currentUser != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Consumer<LanguageProvider>(
+                          builder: (context, lang, _) => Text(
+                            '${lang.getText('welcome_back')}, ${currentUser.username} 👋',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
+                    if (currentUser != null) const SizedBox(height: 12),
                     Row(
                       children: [
                         Container(
@@ -203,27 +221,29 @@ class _HomeTabState extends State<HomeTab> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Naad Bailgada',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
+                        Consumer<LanguageProvider>(
+                          builder: (context, lang, _) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                lang.getText('app_title'),
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'बैलगाडा शर्यत',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.white70,
-                                fontWeight: FontWeight.normal,
+                              Text(
+                                lang.getText('app_subtitle'),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -235,13 +255,55 @@ class _HomeTabState extends State<HomeTab> {
         ),
       ),
       actions: [
+        Consumer<LanguageProvider>(
+          builder: (context, lang, _) => TextButton(
+            onPressed: () => lang.toggleLanguage(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 0),
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white.withOpacity(0.5)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                lang.isMarathi ? 'EN' : 'मराठी',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ),
+          ),
+        ),
         IconButton(
           icon: const Icon(Icons.refresh, color: Colors.white),
           onPressed: () => context.read<RaceProvider>().loadHomeRaces(),
         ),
-        IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: _handleLogout,
+        // Wrap auth-dependent button in Consumer to ensure it rebuilds
+        Consumer<AuthProvider>(
+          builder: (context, authProvider, _) {
+            final user = authProvider.currentUser;
+            // Show logout button only if logged in
+            if (user != null) {
+              return IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                onPressed: _handleLogout,
+              );
+            }
+            // Show login button if not logged in
+            else {
+              return IconButton(
+                icon: const Icon(Icons.login, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
+                },
+              );
+            }
+          },
         ),
       ],
     );
@@ -336,7 +398,7 @@ class _HomeTabState extends State<HomeTab> {
             ElevatedButton.icon(
               onPressed: () => provider.loadHomeRaces(),
               icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
+              label: Text(context.read<LanguageProvider>().getText('try_again')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryOrange,
                 foregroundColor: Colors.white,
@@ -366,7 +428,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No races available right now',
+              context.watch<LanguageProvider>().getText('no_races'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -380,6 +442,23 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void _navigateToDetail(Race race) {
+    final authProvider = context.read<AuthProvider>();
+    final isLoggedIn = authProvider.isLoggedIn;
+
+    // If user is not logged in, redirect to login screen
+    if (!isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(
+            redirectToScreen: RaceDaysScreen(race: race),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // User is logged in, navigate to race detail
     Navigator.push(
       context,
       MaterialPageRoute(

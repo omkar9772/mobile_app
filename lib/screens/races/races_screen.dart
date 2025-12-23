@@ -7,6 +7,7 @@ import '../../models/race.dart';
 import '../../widgets/race_card.dart';
 import 'race_days_screen.dart';
 import '../../providers/race_provider.dart';
+import '../../providers/language_provider.dart';
 
 class RacesScreen extends StatefulWidget {
   const RacesScreen({super.key});
@@ -70,9 +71,10 @@ class _RacesScreenState extends State<RacesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Races'),
+        title: Text(lang.getText('all_races')),
         backgroundColor: AppTheme.primaryOrange,
         foregroundColor: Colors.white,
         actions: [
@@ -99,7 +101,7 @@ class _RacesScreenState extends State<RacesScreen> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => provider.loadAllRaces(),
-                    child: const Text('Retry'),
+                    child: Text(lang.getText('retry')),
                   ),
                 ],
               ),
@@ -115,7 +117,7 @@ class _RacesScreenState extends State<RacesScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by race name or location...',
+                    hintText: lang.getText('search_races'),
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -155,8 +157,8 @@ class _RacesScreenState extends State<RacesScreen> {
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty
-                                  ? 'No races found'
-                                  : 'No races match your search',
+                                  ? lang.getText('no_races_found')
+                                  : lang.getText('no_races_match'),
                               style: const TextStyle(
                                 fontSize: 18,
                                 color: AppTheme.textLight,
@@ -188,8 +190,8 @@ class _RacesScreenState extends State<RacesScreen> {
                                 padding: const EdgeInsets.all(16),
                                 child: Center(
                                   child: Text(
-                                    'No more races',
-                                    style: TextStyle(
+                                    lang.getText('no_more_races'),
+                                    style: const TextStyle(
                                       color: AppTheme.textLight,
                                       fontSize: 14,
                                     ),

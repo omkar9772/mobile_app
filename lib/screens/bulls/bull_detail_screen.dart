@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/bull.dart';
 import '../../providers/bull_provider.dart';
+import '../../providers/language_provider.dart';
 
 class BullDetailScreen extends StatefulWidget {
   final Bull bull;
@@ -92,7 +93,9 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
                           _buildStatsGrid(bull),
                           const SizedBox(height: 24),
                           if (bull.description != null && bull.description!.isNotEmpty) ...[
-                            _buildSectionTitle('Description'),
+                            Consumer<LanguageProvider>(
+                              builder: (context, lang, _) => _buildSectionTitle(lang.getText('description')),
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               bull.description!,
@@ -110,11 +113,13 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _shareBull(bull),
-            backgroundColor: AppTheme.primaryOrange,
-            icon: const Icon(Icons.share, color: Colors.white),
-            label: const Text('Share Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          floatingActionButton: Consumer<LanguageProvider>(
+            builder: (context, lang, _) => FloatingActionButton.extended(
+              onPressed: () => _shareBull(bull),
+              backgroundColor: AppTheme.primaryOrange,
+              icon: const Icon(Icons.share, color: Colors.white),
+              label: Text(lang.getText('share_profile'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
           ),
         );
       },
@@ -215,13 +220,14 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
   }
 
   Widget _buildStatsGrid(Bull bull) {
+    final lang = context.watch<LanguageProvider>();
     List<Widget> cards = [];
 
     // 1. Wins
     if (bull.statistics != null) {
       cards.add(Expanded(
         child: _buildStatCard(
-          'Wins',
+          lang.getText('wins'),
           '${bull.statistics!.firstPlaceWins}',
           Icons.emoji_events,
           Colors.amber,
@@ -234,7 +240,7 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
     if (bull.color != null && bull.color!.isNotEmpty) {
       cards.add(Expanded(
         child: _buildStatCard(
-          'Color',
+          lang.getText('color'),
           bull.color!,
           Icons.palette,
           Colors.purple.shade400,
@@ -246,7 +252,7 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
     if (bull.birthYear != null) {
       cards.add(Expanded(
         child: _buildStatCard(
-          'Age',
+          lang.getText('age'),
           bull.displayAge,
           Icons.access_time_filled,
           Colors.blue.shade400,
@@ -322,11 +328,12 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
 
   Widget _buildOwnerCard(Bull bull) {
     if (bull.owner == null && bull.ownerName == null) return const SizedBox.shrink();
-    
+
     final name = bull.owner?.name ?? bull.ownerName ?? 'Unknown Owner';
     final address = bull.owner?.address ?? bull.ownerAddress ?? 'No Address';
     final phone = bull.owner?.phone;
     final photoUrl = bull.owner?.photoUrl;
+    final lang = context.watch<LanguageProvider>();
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -346,7 +353,7 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
           Row(
             children: [
               Container(
-                 width: 60, height: 60,
+                 width: 80, height: 80,
                  decoration: BoxDecoration(
                    shape: BoxShape.circle,
                    color: AppTheme.primaryOrange.withOpacity(0.1),
@@ -357,10 +364,10 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
                        ? CachedNetworkImage(
                            imageUrl: photoUrl,
                            fit: BoxFit.cover,
-                           placeholder: (context, url) => const Icon(Icons.person, color: AppTheme.primaryOrange),
-                           errorWidget: (context, url, error) => const Icon(Icons.person, color: AppTheme.primaryOrange),
+                           placeholder: (context, url) => const Icon(Icons.person, color: AppTheme.primaryOrange, size: 40),
+                           errorWidget: (context, url, error) => const Icon(Icons.person, color: AppTheme.primaryOrange, size: 40),
                          )
-                       : const Icon(Icons.person, color: AppTheme.primaryOrange, size: 30),
+                       : const Icon(Icons.person, color: AppTheme.primaryOrange, size: 40),
                  ),
               ),
               const SizedBox(width: 16),
@@ -369,7 +376,7 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Owner',
+                      lang.getText('owner'),
                       style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),

@@ -6,6 +6,7 @@ import 'dart:ui';
 import '../../config/theme.dart';
 import '../../models/marketplace_listing.dart';
 import '../../providers/marketplace_provider.dart';
+import '../../providers/language_provider.dart';
 
 class AvailableBullsScreen extends StatefulWidget {
   const AvailableBullsScreen({super.key});
@@ -42,8 +43,9 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
       await launchUrl(phoneUri);
     } else {
       if (mounted) {
+        final lang = context.read<LanguageProvider>();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch phone app')),
+          SnackBar(content: Text(lang.getText('could_not_launch_phone'))),
         );
       }
     }
@@ -106,11 +108,13 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Center(
-                        child: Text(
-                          'No more listings',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontSize: 14,
+                        child: Consumer<LanguageProvider>(
+                          builder: (context, lang, _) => Text(
+                            lang.getText('no_more_listings'),
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -125,6 +129,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
   }
 
   Widget _buildSliverAppBar(MarketplaceProvider provider) {
+    final lang = context.watch<LanguageProvider>();
     return SliverAppBar(
       expandedHeight: 120.0,
       floating: true,
@@ -138,9 +143,9 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
       ],
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-        title: const Text(
-          'Marketplace',
-          style: TextStyle(
+        title: Text(
+          lang.getText('marketplace'),
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -346,12 +351,16 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                       ),
                       const SizedBox(height: 24),
                       if (listing.description != null) ...[
-                        const Text('Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Consumer<LanguageProvider>(
+                          builder: (context, lang, _) => Text(lang.getText('description'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        ),
                         const SizedBox(height: 8),
                         Text(listing.description!, style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87)),
                         const SizedBox(height: 24),
                       ],
-                      const Text('Owner', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Consumer<LanguageProvider>(
+                        builder: (context, lang, _) => Text(lang.getText('owner'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
                       const SizedBox(height: 12),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
@@ -380,6 +389,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
   }
 
   Widget _buildError(MarketplaceProvider provider) {
+    final lang = context.watch<LanguageProvider>();
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -390,7 +400,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => provider.loadListings(),
-            child: const Text('Retry'),
+            child: Text(lang.getText('retry')),
           ),
         ],
       ),
@@ -398,6 +408,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
   }
 
   Widget _buildEmptyState() {
+    final lang = context.watch<LanguageProvider>();
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -405,7 +416,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
           Icon(Icons.shopping_bag_outlined, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            'No bulls available yet',
+            lang.getText('no_bulls_available'),
             style: TextStyle(fontSize: 18, color: Colors.grey.shade400, fontWeight: FontWeight.w500),
           ),
         ],

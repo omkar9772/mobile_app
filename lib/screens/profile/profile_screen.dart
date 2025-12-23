@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/language_provider.dart';
 import '../auth/login_screen.dart';
 import '../user_bulls/my_bulls_screen.dart';
 import 'change_password_screen.dart';
@@ -18,22 +19,23 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleLogout() async {
+    final lang = context.read<LanguageProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(lang.getText('logout_confirm_title')),
+        content: Text(lang.getText('logout_confirm_msg')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(lang.getText('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.errorRed,
             ),
-            child: const Text('Logout'),
+            child: Text(lang.getText('logout')),
           ),
         ],
       ),
@@ -55,8 +57,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _launchUrl(Uri uri) async {
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
+        final lang = context.read<LanguageProvider>();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch app')),
+          SnackBar(content: Text(lang.getText('could_not_launch_app'))),
         );
       }
     }
@@ -136,6 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ... existing _buildHeader, _buildInfoSection, _buildMiniInfoChip
 
   Widget _buildSupportSection() {
+    final lang = context.watch<LanguageProvider>();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(AppTheme.spacingMd),
@@ -153,26 +157,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 8, bottom: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
             child: Text(
-              'Support & Contribution',
+              lang.getText('support_contribution'),
               style: AppTheme.heading3,
             ),
           ),
           _buildSettingsTile(
             context,
             icon: Icons.mail_outline,
-            title: 'Email Us',
-            subtitle: 'info@naadbailgada.com',
+            title: lang.getText('email_us'),
+            subtitle: lang.getText('email_address'),
             onTap: _launchEmail,
           ),
           const Divider(height: 1, indent: 60, endIndent: 20),
           _buildSettingsTile(
             context,
-            icon: Icons.message_outlined, // Using message icon as generic for chat
-            title: 'Share Data via WhatsApp',
-            subtitle: 'Submit Race/Bull details',
+            icon: Icons.message_outlined,
+            title: lang.getText('share_via_whatsapp'),
+            subtitle: lang.getText('submit_race_bull_details'),
             onTap: _launchWhatsApp,
           ),
         ],
@@ -181,6 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSocialSection() {
+    final lang = context.watch<LanguageProvider>();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(AppTheme.spacingMd),
@@ -198,29 +203,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 8, bottom: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
             child: Text(
-              'Follow Us',
+              lang.getText('follow_us'),
               style: AppTheme.heading3,
             ),
           ),
           _buildSettingsTile(
             context,
             icon: FontAwesomeIcons.youtube,
-            title: 'YouTube',
-            subtitle: 'Naad Bailgada Official',
+            title: lang.getText('youtube'),
+            subtitle: lang.getText('naad_bailgada_official'),
             onTap: _launchYoutube,
-            iconColor: Colors.red, // Brand color for YouTube
+            iconColor: Colors.red,
           ),
           const Divider(height: 1, indent: 60, endIndent: 20),
           _buildSettingsTile(
             context,
             icon: FontAwesomeIcons.instagram,
-            title: 'Instagram',
-            subtitle: '@naad_bailgada.official',
+            title: lang.getText('instagram'),
+            subtitle: lang.getText('instagram_handle'),
             onTap: _launchInstagram,
-            iconColor: Colors.purple, // Brand color for Instagram
+            iconColor: Colors.purple,
           ),
         ],
       ),
@@ -282,13 +287,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
-        // Username inside header (optional) or below. 
+        // Username inside header (optional) or below.
         // Let's put a welcome text or similar in the header if needed.
         Positioned(
           top: 60,
-          child: Text(
-            'Profile',
-            style: AppTheme.heading2.copyWith(color: Colors.white),
+          child: Consumer<LanguageProvider>(
+            builder: (context, lang, _) => Text(
+              lang.getText('profile'),
+              style: AppTheme.heading2.copyWith(color: Colors.white),
+            ),
           ),
         ),
       ],
@@ -363,6 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSettingsSection(BuildContext context, String username) {
+    final lang = context.watch<LanguageProvider>();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
@@ -381,8 +389,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildSettingsTile(
             context,
             icon: Icons.pets_outlined,
-            title: 'My Bulls for Sale',
-            subtitle: 'Manage your listings',
+            title: lang.getText('my_bulls_for_sale'),
+            subtitle: lang.getText('manage_listings'),
             onTap: () {
               Navigator.push(
                 context,
@@ -396,8 +404,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildSettingsTile(
             context,
             icon: Icons.edit_outlined,
-            title: 'Edit Profile',
-            subtitle: 'Update your details',
+            title: lang.getText('edit_profile'),
+            subtitle: lang.getText('update_details'),
             onTap: () {
               Navigator.push(
                 context,
@@ -411,8 +419,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildSettingsTile(
             context,
             icon: Icons.lock_outline,
-            title: 'Change Password',
-            subtitle: 'Update your security',
+            title: lang.getText('change_password'),
+            subtitle: lang.getText('update_security'),
             onTap: () {
               Navigator.push(
                 context,
@@ -470,35 +478,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildLogoutButton() {
-    return TextButton.icon(
-      onPressed: _handleLogout,
-      icon: const Icon(Icons.logout, size: 20),
-      label: const Text(
-        'Log Out',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      style: TextButton.styleFrom(
-        foregroundColor: AppTheme.errorRed,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+    return Consumer<LanguageProvider>(
+      builder: (context, lang, _) => TextButton.icon(
+        onPressed: _handleLogout,
+        icon: const Icon(Icons.logout, size: 20),
+        label: Text(
+          lang.getText('log_out'),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: AppTheme.errorRed,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        ),
       ),
     );
   }
 
   Widget _buildAppInfo() {
-    return Column(
-      children: [
-        Image.asset(
-          'assets/images/logo.png',
-          width: 24,
-          height: 24,
-          color: Colors.grey.shade400, // Grayscale logo for footer
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Naad Bailgada v1.0.0',
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.textLight.withOpacity(0.5)),
-        ),
-      ],
+    return Consumer<LanguageProvider>(
+      builder: (context, lang, _) => Column(
+        children: [
+          Image.asset(
+            'assets/images/logo.png',
+            width: 24,
+            height: 24,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            lang.getText('app_version'),
+            style: AppTheme.bodySmall.copyWith(color: AppTheme.textLight.withOpacity(0.5)),
+          ),
+        ],
+      ),
     );
   }
 }

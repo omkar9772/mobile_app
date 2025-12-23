@@ -4,10 +4,18 @@ import 'dart:ui'; // For ImageFilter
 import '../../config/theme.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/language_provider.dart';
 import '../home/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final int? redirectTabIndex;
+  final Widget? redirectToScreen;
+
+  const LoginScreen({
+    super.key,
+    this.redirectTabIndex,
+    this.redirectToScreen,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -86,9 +94,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
+        // If there's a specific screen to redirect to, go there
+        if (widget.redirectToScreen != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => widget.redirectToScreen!),
+          );
+        } else {
+          // Otherwise go to MainScreen with the specified tab index
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => MainScreen(initialTabIndex: widget.redirectTabIndex),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -118,9 +136,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       ));
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
+        // If there's a specific screen to redirect to, go there
+        if (widget.redirectToScreen != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => widget.redirectToScreen!),
+          );
+        } else {
+          // Otherwise go to MainScreen with the specified tab index
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => MainScreen(initialTabIndex: widget.redirectTabIndex),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -183,30 +211,36 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Naad Bailgada',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
+                        Consumer<LanguageProvider>(
+                          builder: (context, lang, _) => Column(
+                            children: [
+                              Text(
+                                lang.getText('app_title'),
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                lang.getText('app_subtitle'),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 1.0,
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'बैलगाडा शर्यत',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1.0,
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -262,9 +296,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         indicatorSize: TabBarIndicatorSize.tab,
                                         dividerColor: Colors.transparent,
                                         padding: const EdgeInsets.all(5),
-                                        tabs: const [
-                                          Tab(text: 'Login'),
-                                          Tab(text: 'Register'),
+                                        tabs: [
+                                          Tab(text: context.watch<LanguageProvider>().getText('login')),
+                                          Tab(text: context.watch<LanguageProvider>().getText('register')),
                                         ],
                                       ),
                                     ),
@@ -307,6 +341,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Widget _buildLoginForm(bool isLoading) {
+    final lang = context.watch<LanguageProvider>();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Form(
@@ -317,41 +352,41 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             const SizedBox(height: 16),
             _buildTextField(
               controller: _loginUsernameController,
-              label: 'Username',
+              label: lang.getText('username'),
               icon: Icons.person_outline,
-              validator: (v) => v?.isEmpty == true ? 'Required' : null,
+              validator: (v) => v?.isEmpty == true ? lang.getText('required') : null,
             ),
             const SizedBox(height: 20),
             _buildTextField(
               controller: _loginPasswordController,
-              label: 'Password',
+              label: lang.getText('password'),
               icon: Icons.lock_outline,
               isPassword: true,
-              validator: (v) => v?.isEmpty == true ? 'Required' : null,
+              validator: (v) => v?.isEmpty == true ? lang.getText('required') : null,
             ),
-            
+
             if (_loginError != null) ...[
               const SizedBox(height: 20),
               _buildErrorBanner(_loginError!),
             ],
-            
+
             const SizedBox(height: 32),
             _buildPrimaryButton(
-              text: 'Login',
+              text: lang.getText('login'),
               onPressed: _handleLogin,
               isLoading: isLoading,
             ),
-            
+
             const SizedBox(height: 20),
             Center(
               child: TextButton(
                 onPressed: () {
                    // Implement forgot password if needed
                    ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(content: Text('Contact Admin to reset password')),
+                     SnackBar(content: Text(lang.getText('contact_admin_reset'))),
                    );
                 },
-                child: Text('Forgot Password?', style: TextStyle(color: Colors.grey.shade600)),
+                child: Text(lang.getText('forgot_password'), style: TextStyle(color: Colors.grey.shade600)),
               ),
             ),
           ],
@@ -361,6 +396,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Widget _buildRegisterForm(bool isLoading) {
+    final lang = context.watch<LanguageProvider>();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Form(
@@ -370,49 +406,49 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           children: [
             _buildTextField(
               controller: _registerFullNameController,
-              label: 'Full Name',
+              label: lang.getText('full_name'),
               icon: Icons.badge_outlined,
-              validator: (v) => v?.isEmpty == true ? 'Required' : null,
+              validator: (v) => v?.isEmpty == true ? lang.getText('required') : null,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               controller: _registerUsernameController,
-              label: 'Username',
+              label: lang.getText('username'),
               icon: Icons.account_circle_outlined,
-              validator: (v) => (v?.length ?? 0) < 3 ? 'Min 3 chars' : null,
+              validator: (v) => (v?.length ?? 0) < 3 ? lang.getText('min_3_chars') : null,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               controller: _registerEmailController,
-              label: 'Email',
+              label: lang.getText('email'),
               icon: Icons.email_outlined,
               inputType: TextInputType.emailAddress,
-              validator: (v) => !(v?.contains('@') ?? false) ? 'Invalid email' : null,
+              validator: (v) => !(v?.contains('@') ?? false) ? lang.getText('invalid_email') : null,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               controller: _registerPhoneController,
-              label: 'Phone (Optional)',
+              label: lang.getText('phone_optional'),
               icon: Icons.phone_outlined,
               inputType: TextInputType.phone,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               controller: _registerPasswordController,
-              label: 'Password',
+              label: lang.getText('password'),
               icon: Icons.lock_outline,
               isPassword: true,
-              validator: (v) => (v?.length ?? 0) < 6 ? 'Min 6 chars' : null,
+              validator: (v) => (v?.length ?? 0) < 6 ? lang.getText('min_6_chars') : null,
             ),
-            
+
             if (_registerError != null) ...[
               const SizedBox(height: 20),
               _buildErrorBanner(_registerError!),
             ],
-            
+
             const SizedBox(height: 32),
             _buildPrimaryButton(
-              text: 'Create Account',
+              text: lang.getText('create_account'),
               onPressed: _handleRegister,
               isLoading: isLoading,
             ),

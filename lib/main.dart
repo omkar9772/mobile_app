@@ -3,15 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:app_links/app_links.dart';
 import 'config/theme.dart';
 import 'package:provider/provider.dart';
-import 'screens/auth/login_screen.dart';
 import 'screens/home/main_screen.dart';
 import 'screens/bulls/bull_detail_screen.dart';
-import 'services/auth_service.dart';
 import 'services/bull_service.dart';
 import 'providers/auth_provider.dart';
 import 'providers/bull_provider.dart';
+import 'providers/owner_provider.dart';
 import 'providers/race_provider.dart';
 import 'providers/marketplace_provider.dart';
+import 'providers/language_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,8 +29,10 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => BullProvider()),
+        ChangeNotifierProvider(create: (_) => OwnerProvider()),
         ChangeNotifierProvider(create: (_) => RaceProvider()),
         ChangeNotifierProvider(create: (_) => MarketplaceProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: const NaadBailgadaApp(),
     ),
@@ -135,8 +137,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final AuthService _authService = AuthService();
-
   @override
   void initState() {
     super.initState();
@@ -146,14 +146,12 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 1));
 
-    final isLoggedIn = await _authService.isLoggedIn();
-
+    // Always navigate to MainScreen, regardless of auth status
+    // MainScreen will handle showing/hiding Profile tab based on auth
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => isLoggedIn
-              ? const MainScreen()
-              : const LoginScreen(),
+          builder: (context) => const MainScreen(),
         ),
       );
     }

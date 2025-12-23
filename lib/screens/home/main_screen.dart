@@ -6,12 +6,17 @@ import '../bulls/bulls_screen.dart';
 import '../marketplace/available_bulls_screen.dart';
 import 'package:provider/provider.dart';
 import '../profile/profile_screen.dart';
+import '../auth/login_screen.dart';
 import '../../providers/race_provider.dart';
 import '../../providers/bull_provider.dart';
 import '../../providers/marketplace_provider.dart';
+import '../../providers/language_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int? initialTabIndex;
+
+  const MainScreen({super.key, this.initialTabIndex});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -28,7 +33,36 @@ class _MainScreenState extends State<MainScreen> {
     const ProfileScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // Set initial tab index if provided
+    _selectedIndex = widget.initialTabIndex ?? 0;
+
+    // Load Home races by default when app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final raceProvider = context.read<RaceProvider>();
+      if (!raceProvider.isLoadedHome) {
+        raceProvider.loadHomeRaces();
+      }
+    });
+  }
+
   void _onItemTapped(int index) {
+    final authProvider = context.read<AuthProvider>();
+    final isLoggedIn = authProvider.isLoggedIn;
+
+    // If user is not logged in and trying to access anything other than Home
+    if (!isLoggedIn && index != 0) {
+      // Show login screen with redirect info
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(redirectTabIndex: index),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });
@@ -47,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
           raceProvider.loadAllRaces();
         }
         break;
-      case 2: // Bulls
+      case 2: // Community (Bulls/Owners)
         final bullProvider = context.read<BullProvider>();
         if (!bullProvider.isLoaded) {
           bullProvider.loadBulls();
@@ -67,41 +101,56 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryOrange,
-        unselectedItemColor: AppTheme.textLight,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        items: const [
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final isLoggedIn = authProvider.isLoggedIn;
+
+        // Build bottom navigation items - exclude Profile if not logged in
+        List<BottomNavigationBarItem> navItems = [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home),
+            label: context.watch<LanguageProvider>().getText('nav_home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: 'Races',
+            icon: const Icon(Icons.emoji_events),
+            label: context.watch<LanguageProvider>().getText('nav_races'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.pets),
-            label: 'Bulls',
+            icon: const Icon(Icons.groups),
+            label: context.watch<LanguageProvider>().getText('nav_community'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.volunteer_activism),
-            label: 'Available',
+            icon: const Icon(Icons.volunteer_activism),
+            label: context.watch<LanguageProvider>().getText('nav_available'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+        ];
+
+        // Add Profile tab only if logged in
+        if (isLoggedIn) {
+          navItems.add(
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person),
+              label: context.watch<LanguageProvider>().getText('nav_profile'),
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
           ),
-        ],
-      ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: AppTheme.primaryOrange,
+            unselectedItemColor: AppTheme.textLight,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            items: navItems,
+          ),
+        );
+      },
     );
   }
 }

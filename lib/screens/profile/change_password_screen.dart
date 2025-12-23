@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../providers/language_provider.dart';
 import '../../services/auth_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -37,8 +39,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
+      final lang = context.read<LanguageProvider>();
       setState(() {
-        _error = 'New passwords do not match';
+        _error = lang.getText('passwords_not_match');
       });
       return;
     }
@@ -56,9 +59,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
 
       if (mounted) {
+        final lang = context.read<LanguageProvider>();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password changed successfully!'),
+          SnackBar(
+            content: Text(lang.getText('password_changed')),
             backgroundColor: AppTheme.successGreen,
           ),
         );
@@ -74,9 +78,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title: Text(lang.getText('change_password')),
         backgroundColor: AppTheme.primaryOrange,
         foregroundColor: Colors.white,
       ),
@@ -93,14 +98,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 color: AppTheme.primaryOrange,
               ),
               const SizedBox(height: AppTheme.spacingLg),
-              const Text(
-                'Change Your Password',
+              Text(
+                lang.getText('change_your_password'),
                 textAlign: TextAlign.center,
                 style: AppTheme.heading2,
               ),
               const SizedBox(height: AppTheme.spacingSm),
-              const Text(
-                'Enter your current password and choose a new one',
+              Text(
+                lang.getText('enter_current_new_password'),
                 textAlign: TextAlign.center,
                 style: AppTheme.bodyMedium,
               ),
@@ -110,7 +115,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _oldPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'Current Password',
+                  labelText: lang.getText('current_password'),
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -122,7 +127,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureOld,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter current password';
+                    return lang.getText('enter_current_password');
                   }
                   return null;
                 },
@@ -133,7 +138,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _newPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'New Password',
+                  labelText: lang.getText('new_password'),
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -145,10 +150,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureNew,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter new password';
+                    return lang.getText('enter_new_password');
                   }
                   if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
+                    return lang.getText('password_min_6');
                   }
                   return null;
                 },
@@ -159,7 +164,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'Confirm New Password',
+                  labelText: lang.getText('confirm_new_password'),
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -172,7 +177,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 obscureText: _obscureConfirm,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please confirm new password';
+                    return lang.getText('confirm_password');
                   }
                   return null;
                 },
@@ -209,7 +214,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text('Change Password'),
+                    : Text(lang.getText('change_password')),
               ),
             ],
           ),

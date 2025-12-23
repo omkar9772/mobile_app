@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/race.dart';
+import '../../providers/language_provider.dart';
 import '../../utils/date_helper.dart';
 
 class RaceDetailScreen extends StatelessWidget {
@@ -10,9 +12,10 @@ class RaceDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Race Details'),
+        title: Text(lang.getText('race_details')),
         backgroundColor: AppTheme.primaryOrange,
         foregroundColor: Colors.white,
       ),
@@ -74,8 +77,9 @@ class RaceDetailScreen extends StatelessWidget {
                   // Date Range
                   _buildDetailRow(
                     Icons.calendar_today,
-                    'Dates',
+                    lang.getText('dates'),
                     '${DateHelper.formatDate(race.startDate)} - ${DateHelper.formatDate(race.endDate)}',
+                    lang,
                   ),
                   const SizedBox(height: AppTheme.spacingMd),
 
@@ -83,8 +87,9 @@ class RaceDetailScreen extends StatelessWidget {
                   if (race.address.isNotEmpty) ...[
                     _buildDetailRow(
                       Icons.location_on,
-                      'Location',
+                      lang.getText('location'),
                       race.address,
+                      lang,
                     ),
                     const SizedBox(height: AppTheme.spacingMd),
                   ],
@@ -92,15 +97,16 @@ class RaceDetailScreen extends StatelessWidget {
                   // Track Length
                   _buildDetailRow(
                     Icons.straighten,
-                    'Track Length',
+                    lang.getText('track_length'),
                     race.getTrackLength(),
+                    lang,
                   ),
                   const SizedBox(height: AppTheme.spacingMd),
 
                   // Description
                   if (race.description != null && race.description!.isNotEmpty) ...[
-                    const Text(
-                      'Description',
+                    Text(
+                      lang.getText('description'),
                       style: AppTheme.heading3,
                     ),
                     const SizedBox(height: AppTheme.spacingSm),
@@ -118,7 +124,7 @@ class RaceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String label, String value, LanguageProvider lang) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
