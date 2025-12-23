@@ -12,6 +12,7 @@ class AppConfig {
   static const String authLogin = '/auth/login';
   static const String authMe = '/auth/me';
   static const String authChangePassword = '/auth/change-password';
+  static const String authUpdateProfile = '/auth/update-profile';
 
   static const String publicRaces = '/public/races';
   static const String publicRecentRaces = '/public/races/recent';
@@ -33,6 +34,18 @@ class AppConfig {
   // Storage Keys
   static const String tokenKey = 'naad_auth_token';
   static const String userKey = 'naad_user';
+
+  // API Configuration
+  static const int apiTimeoutSeconds = 30;
+  static const int maxRetries = 3;
+
+  // Image Configuration
+  static const int maxImageSize = 5 * 1024 * 1024; // 5MB
+  static const int imageQuality = 80;
+  static const int maxImageDimension = 1024;
+
+  // Search Configuration
+  static const int searchDebounceMs = 300;
 
   // Environment helpers
   static bool get isLocalDevelopment => apiBaseUrl.contains('localhost') || apiBaseUrl.contains('127.0.0.1');

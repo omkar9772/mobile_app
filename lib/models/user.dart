@@ -111,3 +111,26 @@ class AuthResponse {
     );
   }
 }
+
+class UpdateUserRequest {
+  final String? username;
+  final String? email;
+  final String? fullName;
+  final String? phone;
+
+  UpdateUserRequest({
+    this.username,
+    this.email,
+    this.fullName,
+    this.phone,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (username != null) data['username'] = username;
+    if (email != null) data['email'] = email;
+    if (fullName != null) data['full_name'] = fullName;
+    if (phone != null) data['phone'] = phone;
+    return data;
+  }
+}

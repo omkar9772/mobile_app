@@ -3,16 +3,17 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../models/user_bull_sell.dart';
+import '../utils/image_compression_helper.dart';
+import 'secure_storage_service.dart';
 
 class UserBullService {
   final String baseUrl = AppConfig.apiBaseUrl;
+  final SecureStorageService _secureStorage = SecureStorageService();
 
   Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(AppConfig.tokenKey);
+    return await _secureStorage.getToken();
   }
 
   Map<String, String> _getAuthHeaders(String token) {
@@ -112,7 +113,7 @@ class UserBullService {
       if (location != null) request.fields['location'] = location;
       if (ownerMobile != null) request.fields['owner_mobile'] = ownerMobile;
 
-      // Add image file - use bytes for web compatibility
+      // Add image file - compress first, then upload
       if (kIsWeb && imageXFile != null) {
         final bytes = await imageXFile.readAsBytes();
         request.files.add(
@@ -123,8 +124,16 @@ class UserBullService {
           ),
         );
       } else if (imageFile != null) {
+        // Validate and compress image before upload
+        if (!await ImageCompressionHelper.validateImage(imageFile)) {
+          throw Exception('Invalid image file. Please select a valid image (max 5MB).');
+        }
+
+        // Compress the image
+        final compressedImage = await ImageCompressionHelper.compressImage(imageFile);
+
         request.files.add(
-          await http.MultipartFile.fromPath('image', imageFile.path),
+          await http.MultipartFile.fromPath('image', compressedImage.path),
         );
       } else {
         throw Exception('No image provided');
@@ -183,10 +192,18 @@ class UserBullService {
       if (ownerMobile != null) request.fields['owner_mobile'] = ownerMobile;
       if (status != null) request.fields['status'] = status;
 
-      // Add image file if provided
+      // Add image file if provided - compress first
       if (imageFile != null) {
+        // Validate and compress image before upload
+        if (!await ImageCompressionHelper.validateImage(imageFile)) {
+          throw Exception('Invalid image file. Please select a valid image (max 5MB).');
+        }
+
+        // Compress the image
+        final compressedImage = await ImageCompressionHelper.compressImage(imageFile);
+
         request.files.add(
-          await http.MultipartFile.fromPath('image', imageFile.path),
+          await http.MultipartFile.fromPath('image', compressedImage.path),
         );
       }
 

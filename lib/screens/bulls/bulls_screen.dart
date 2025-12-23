@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
+import '../../config/app_config.dart';
 import '../../models/bull.dart';
 import '../../providers/bull_provider.dart';
 import 'bull_detail_screen.dart';
@@ -15,21 +17,38 @@ class BullsScreen extends StatefulWidget {
 
 class _BullsScreenState extends State<BullsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<BullProvider>().loadMoreBulls();
+    }
+  }
+
   void _onSearchChanged() {
-    context.read<BullProvider>().search(_searchController.text);
+    _debounce?.cancel();
+    _debounce = Timer(
+      Duration(milliseconds: AppConfig.searchDebounceMs),
+      () {
+        context.read<BullProvider>().search(_searchController.text);
+      },
+    );
   }
 
   @override
@@ -39,10 +58,11 @@ class _BullsScreenState extends State<BullsScreen> {
       body: Consumer<BullProvider>(
         builder: (context, provider, child) {
           return CustomScrollView(
+            controller: _scrollController,
             slivers: [
               _buildSliverAppBar(),
               _buildSearchAndFilters(provider),
-              
+
               if (provider.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
@@ -55,7 +75,7 @@ class _BullsScreenState extends State<BullsScreen> {
                 SliverFillRemaining(
                   child: _buildEmptyState(provider),
                 )
-              else
+              else ...[
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   sliver: SliverGrid(
@@ -71,6 +91,35 @@ class _BullsScreenState extends State<BullsScreen> {
                     ),
                   ),
                 ),
+
+                // Loading more indicator
+                if (provider.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+
+                // No more items indicator
+                if (!provider.hasMore && provider.bulls.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: Text(
+                          'No more bulls',
+                          style: TextStyle(
+                            color: AppTheme.textLight,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ],
           );
         },
@@ -132,6 +181,7 @@ class _BullsScreenState extends State<BullsScreen> {
             ),
             child: TextField(
               controller: _searchController,
+              onChanged: (value) => _onSearchChanged(),
               decoration: InputDecoration(
                 hintText: 'Search bulls...',
                 prefixIcon: const Icon(Icons.search, color: AppTheme.primaryOrange),

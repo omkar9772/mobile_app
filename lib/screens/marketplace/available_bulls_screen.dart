@@ -15,9 +15,25 @@ class AvailableBullsScreen extends StatefulWidget {
 }
 
 class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<MarketplaceProvider>().loadMoreListings();
+    }
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -40,9 +56,10 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
       body: Consumer<MarketplaceProvider>(
         builder: (context, provider, child) {
           return CustomScrollView(
+            controller: _scrollController,
             slivers: [
               _buildSliverAppBar(provider),
-              
+
               if (provider.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
@@ -55,22 +72,51 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                 SliverFillRemaining(
                   child: _buildEmptyState(),
                 )
-              else
+              else ...[
                 SliverPadding(
-                   padding: const EdgeInsets.all(16),
-                   sliver: SliverGrid(
-                     delegate: SliverChildBuilderDelegate(
-                       (context, index) => _buildGridCard(provider.listings[index], index),
-                       childCount: provider.listings.length,
-                     ),
-                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                       crossAxisCount: 2,
-                       childAspectRatio: 0.75,
-                       mainAxisSpacing: 16,
-                       crossAxisSpacing: 16,
-                     ),
-                   ),
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildGridCard(provider.listings[index], index),
+                      childCount: provider.listings.length,
+                    ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                    ),
+                  ),
                 ),
+
+                // Loading more indicator
+                if (provider.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+
+                // No more items indicator
+                if (!provider.hasMore && provider.listings.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: Text(
+                          'No more listings',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ],
           );
         },

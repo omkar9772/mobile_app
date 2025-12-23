@@ -1,4 +1,3 @@
-import '../config/app_config.dart';
 import '../models/marketplace_listing.dart';
 import 'api_service.dart';
 

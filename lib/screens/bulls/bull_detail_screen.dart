@@ -33,6 +33,8 @@ class _BullDetailScreenState extends State<BullDetailScreen> with SingleTickerPr
         .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Always fetch detail to get original high-quality image
+      // List API serves thumbnails (~20-40 KB), detail API serves original (~100-200 KB)
       context.read<BullProvider>().loadBullById(widget.bull.id);
       _animController.forward();
     });

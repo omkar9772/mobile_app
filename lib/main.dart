@@ -8,7 +8,6 @@ import 'screens/home/main_screen.dart';
 import 'screens/bulls/bull_detail_screen.dart';
 import 'services/auth_service.dart';
 import 'services/bull_service.dart';
-import 'models/bull.dart';
 import 'providers/auth_provider.dart';
 import 'providers/bull_provider.dart';
 import 'providers/race_provider.dart';

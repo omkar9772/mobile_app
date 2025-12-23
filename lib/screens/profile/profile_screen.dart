@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../user_bulls/my_bulls_screen.dart';
 import 'change_password_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -387,6 +388,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const MyBullsScreen(),
+                ),
+              );
+            },
+          ),
+          const Divider(height: 1, indent: 60, endIndent: 20),
+          _buildSettingsTile(
+            context,
+            icon: Icons.edit_outlined,
+            title: 'Edit Profile',
+            subtitle: 'Update your details',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfileScreen(),
                 ),
               );
             },

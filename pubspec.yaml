@@ -69,6 +69,12 @@ dependencies:
   app_links: ^6.3.3
   font_awesome_flutter: ^10.12.0
 
+  # Secure storage for tokens
+  flutter_secure_storage: ^9.0.0
+
+  # Image compression
+  flutter_image_compress: ^2.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

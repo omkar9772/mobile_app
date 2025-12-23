@@ -1,20 +1,19 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../models/user.dart';
 import 'api_service.dart';
+import 'secure_storage_service.dart';
 
 class AuthService {
   final ApiService _apiService = ApiService();
+  final SecureStorageService _secureStorage = SecureStorageService();
 
   Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(AppConfig.tokenKey);
+    return await _secureStorage.hasToken();
   }
 
   Future<User?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(AppConfig.userKey);
+    final userJson = await _secureStorage.getUser();
     if (userJson != null) {
       return User.fromJson(jsonDecode(userJson));
     }
@@ -22,8 +21,7 @@ class AuthService {
   }
 
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(AppConfig.tokenKey);
+    return await _secureStorage.getToken();
   }
 
   Future<AuthResponse> login(LoginRequest request) async {
@@ -36,9 +34,8 @@ class AuthService {
       final data = _apiService.handleResponse(response);
       final authResponse = AuthResponse.fromJson(data);
 
-      // Store token
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(AppConfig.tokenKey, authResponse.accessToken);
+      // Store token securely
+      await _secureStorage.saveToken(authResponse.accessToken);
 
       // Fetch and store full user profile from backend
       await getCurrentUserFromApi();
@@ -65,9 +62,8 @@ class AuthService {
         password: request.password,
       ));
 
-      // Store full user data after login
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(AppConfig.userKey, jsonEncode(user.toJson()));
+      // Store full user data after login (securely)
+      await _secureStorage.saveUser(jsonEncode(user.toJson()));
 
       return user;
     } catch (e) {
@@ -85,9 +81,8 @@ class AuthService {
       final data = _apiService.handleResponse(response);
       final user = User.fromJson(data);
 
-      // Update stored user info
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(AppConfig.userKey, jsonEncode(user.toJson()));
+      // Update stored user info securely
+      await _secureStorage.saveUser(jsonEncode(user.toJson()));
 
       return user;
     } catch (e) {
@@ -96,9 +91,7 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(AppConfig.tokenKey);
-    await prefs.remove(AppConfig.userKey);
+    await _secureStorage.clearAll();
   }
 
   Future<void> changePassword({
@@ -119,6 +112,26 @@ class AuthService {
       _apiService.handleResponse(response);
     } catch (e) {
       throw Exception('Failed to change password: $e');
+    }
+  }
+
+  Future<User> updateProfile(UpdateUserRequest request) async {
+    try {
+      final response = await _apiService.put(
+        AppConfig.authUpdateProfile,
+        request.toJson(),
+        withAuth: true,
+      );
+
+      final data = _apiService.handleResponse(response);
+      final user = User.fromJson(data);
+
+      // Update stored user info securely
+      await _secureStorage.saveUser(jsonEncode(user.toJson()));
+
+      return user;
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
     }
   }
 }
