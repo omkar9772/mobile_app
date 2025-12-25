@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'config/theme.dart';
 import 'package:provider/provider.dart';
 import 'screens/home/main_screen.dart';
@@ -12,9 +14,19 @@ import 'providers/owner_provider.dart';
 import 'providers/race_provider.dart';
 import 'providers/marketplace_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/notification_provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase (skip on web for now - notifications not supported on web)
+  if (!kIsWeb) {
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      debugPrint('Error initializing Firebase: $e');
+    }
+  }
 
   // Set status bar style
   SystemChrome.setSystemUIOverlayStyle(
@@ -33,6 +45,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => RaceProvider()),
         ChangeNotifierProvider(create: (_) => MarketplaceProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const NaadBailgadaApp(),
     ),
@@ -145,6 +158,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 1));
+
+    // Initialize notifications (skip on web - push notifications not supported)
+    if (mounted && !kIsWeb) {
+      try {
+        final notificationProvider =
+            Provider.of<NotificationProvider>(context, listen: false);
+        await notificationProvider.initialize();
+        await notificationProvider.subscribeToRaceNotifications();
+      } catch (e) {
+        debugPrint('Error initializing notifications: $e');
+      }
+    }
 
     // Always navigate to MainScreen, regardless of auth status
     // MainScreen will handle showing/hiding Profile tab based on auth

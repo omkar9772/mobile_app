@@ -135,7 +135,11 @@ class ApiService {
     });
   }
 
-  Future<http.Response> delete(String endpoint, {bool withAuth = false}) async {
+  Future<http.Response> delete(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    bool withAuth = false,
+  }) async {
     return await _retryRequest(() async {
       final token = withAuth ? await _getToken() : null;
       final url = Uri.parse('$baseUrl$endpoint');
@@ -145,6 +149,7 @@ class ApiService {
             .delete(
               url,
               headers: _getHeaders(withAuth: withAuth, token: token),
+              body: body != null ? jsonEncode(body) : null,
             )
             .timeout(Duration(seconds: AppConfig.apiTimeoutSeconds));
         return response;

@@ -4,8 +4,8 @@ class AppConfig {
   // Examples:
   //   - Local development: 'http://localhost:8000/api/v1'
   //   - Android emulator: 'http://10.0.2.2:8000/api/v1'
-  //   - Production: 'https://your-backend-url.com/api/v1'
-  static const String apiBaseUrl = 'http://localhost:8000/api/v1';
+  //   - Production: 'https://naad-bailgada-api-834379191950.asia-south1.run.app/api/v1'
+  static const String apiBaseUrl = 'https://naad-bailgada-api-834379191950.asia-south1.run.app/api/v1';
 
   // Endpoints
   static const String authRegister = '/auth/register';
