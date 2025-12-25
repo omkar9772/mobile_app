@@ -80,6 +80,8 @@ class UserBullService {
   Future<UserBullSell> createBull({
     required String name,
     required double price,
+    required String ownerName,
+    required String ownerMobile,
     File? imageFile,
     XFile? imageXFile,
     String? breed,
@@ -87,7 +89,6 @@ class UserBullService {
     String? color,
     String? description,
     String? location,
-    String? ownerMobile,
   }) async {
     final token = await _getToken();
     if (token == null) {
@@ -105,22 +106,27 @@ class UserBullService {
       // Add fields
       request.fields['name'] = name;
       request.fields['price'] = price.toString();
+      request.fields['owner_name'] = ownerName;
+      request.fields['owner_mobile'] = ownerMobile;
 
       if (breed != null) request.fields['breed'] = breed;
       if (birthYear != null) request.fields['birth_year'] = birthYear.toString();
       if (color != null) request.fields['color'] = color;
       if (description != null) request.fields['description'] = description;
       if (location != null) request.fields['location'] = location;
-      if (ownerMobile != null) request.fields['owner_mobile'] = ownerMobile;
 
       // Add image file - compress first, then upload
       if (kIsWeb && imageXFile != null) {
         final bytes = await imageXFile.readAsBytes();
+        final extension = imageXFile.name.toLowerCase().split('.').last;
+        final contentType = extension == 'png' ? 'image/png' : 'image/jpeg';
+
         request.files.add(
           http.MultipartFile.fromBytes(
             'image',
             bytes,
             filename: imageXFile.name,
+            contentType: http.MediaType.parse(contentType),
           ),
         );
       } else if (imageFile != null) {
@@ -131,9 +137,15 @@ class UserBullService {
 
         // Compress the image
         final compressedImage = await ImageCompressionHelper.compressImage(imageFile);
+        final extension = compressedImage.path.toLowerCase().split('.').last;
+        final contentType = extension == 'png' ? 'image/png' : 'image/jpeg';
 
         request.files.add(
-          await http.MultipartFile.fromPath('image', compressedImage.path),
+          await http.MultipartFile.fromPath(
+            'image',
+            compressedImage.path,
+            contentType: http.MediaType.parse(contentType),
+          ),
         );
       } else {
         throw Exception('No image provided');
@@ -159,13 +171,15 @@ class UserBullService {
     required String id,
     String? name,
     double? price,
+    String? ownerName,
+    String? ownerMobile,
     File? imageFile,
+    XFile? imageXFile,
     String? breed,
     int? birthYear,
     String? color,
     String? description,
     String? location,
-    String? ownerMobile,
     String? status,
   }) async {
     final token = await _getToken();
@@ -181,19 +195,35 @@ class UserBullService {
       // Add headers
       request.headers.addAll(_getAuthHeaders(token));
 
-      // Add fields (only if provided)
+      // Add required fields (always sent if provided)
       if (name != null) request.fields['name'] = name;
       if (price != null) request.fields['price'] = price.toString();
-      if (breed != null) request.fields['breed'] = breed;
-      if (birthYear != null) request.fields['birth_year'] = birthYear.toString();
-      if (color != null) request.fields['color'] = color;
-      if (description != null) request.fields['description'] = description;
-      if (location != null) request.fields['location'] = location;
+      if (ownerName != null) request.fields['owner_name'] = ownerName;
       if (ownerMobile != null) request.fields['owner_mobile'] = ownerMobile;
-      if (status != null) request.fields['status'] = status;
+
+      // Add optional fields (only if provided and not empty)
+      if (breed != null && breed.isNotEmpty) request.fields['breed'] = breed;
+      if (birthYear != null) request.fields['birth_year'] = birthYear.toString();
+      if (color != null && color.isNotEmpty) request.fields['color'] = color;
+      if (description != null && description.isNotEmpty) request.fields['description'] = description;
+      if (location != null && location.isNotEmpty) request.fields['location'] = location;
+      if (status != null && status.isNotEmpty) request.fields['status'] = status;
 
       // Add image file if provided - compress first
-      if (imageFile != null) {
+      if (kIsWeb && imageXFile != null) {
+        final bytes = await imageXFile.readAsBytes();
+        final extension = imageXFile.name.toLowerCase().split('.').last;
+        final contentType = extension == 'png' ? 'image/png' : 'image/jpeg';
+
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            bytes,
+            filename: imageXFile.name,
+            contentType: http.MediaType.parse(contentType),
+          ),
+        );
+      } else if (imageFile != null) {
         // Validate and compress image before upload
         if (!await ImageCompressionHelper.validateImage(imageFile)) {
           throw Exception('Invalid image file. Please select a valid image (max 5MB).');
@@ -201,9 +231,15 @@ class UserBullService {
 
         // Compress the image
         final compressedImage = await ImageCompressionHelper.compressImage(imageFile);
+        final extension = compressedImage.path.toLowerCase().split('.').last;
+        final contentType = extension == 'png' ? 'image/png' : 'image/jpeg';
 
         request.files.add(
-          await http.MultipartFile.fromPath('image', compressedImage.path),
+          await http.MultipartFile.fromPath(
+            'image',
+            compressedImage.path,
+            contentType: http.MediaType.parse(contentType),
+          ),
         );
       }
 

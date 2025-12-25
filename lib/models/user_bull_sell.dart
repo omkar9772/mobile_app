@@ -9,6 +9,7 @@ class UserBullSell {
   final double price;
   final String imageUrl;
   final String? location;
+  final String? ownerName;
   final String? ownerMobile;
   final String status;
   final DateTime createdAt;
@@ -27,6 +28,7 @@ class UserBullSell {
     required this.price,
     required this.imageUrl,
     this.location,
+    this.ownerName,
     this.ownerMobile,
     required this.status,
     required this.createdAt,
@@ -47,6 +49,7 @@ class UserBullSell {
       price: (json['price'] as num).toDouble(),
       imageUrl: json['image_url'],
       location: json['location'],
+      ownerName: json['owner_name'],
       ownerMobile: json['owner_mobile'],
       status: json['status'],
       createdAt: DateTime.parse(json['created_at']),
@@ -68,6 +71,7 @@ class UserBullSell {
       'price': price,
       'image_url': imageUrl,
       'location': location,
+      'owner_name': ownerName,
       'owner_mobile': ownerMobile,
       'status': status,
       'created_at': createdAt.toIso8601String(),

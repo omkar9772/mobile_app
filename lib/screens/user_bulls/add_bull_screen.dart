@@ -4,15 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path/path.dart' as path;
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../services/user_bull_service.dart';
+import '../../models/user_bull_sell.dart';
 
 // If dotted_border is not in pubspec, we can use a custom painter or just a dashed border logic.
 // For now, let's assume standard border with dash effect or just a solid styled border if package missing.
 // Actually, let's try to use a standardized container first.
 
 class AddBullScreen extends StatefulWidget {
-  const AddBullScreen({Key? key}) : super(key: key);
+  final UserBullSell? bullToEdit;
+
+  const AddBullScreen({Key? key, this.bullToEdit}) : super(key: key);
 
   @override
   State<AddBullScreen> createState() => _AddBullScreenState();
@@ -26,17 +30,20 @@ class _AddBullScreenState extends State<AddBullScreen> {
   // Form fields
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _ownerNameController = TextEditingController();
+  final _mobileController = TextEditingController();
   final _breedController = TextEditingController();
   final _birthYearController = TextEditingController();
   final _colorController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
-  final _mobileController = TextEditingController();
 
   File? _imageFile;
   XFile? _imageXFile; // Store XFile for web upload
-  String? _imageUrl; // For web blob URLs
+  String? _imageUrl; // For web blob URLs or existing image URL
   bool _isSubmitting = false;
+  bool _isEditMode = false;
+  String? _existingImageUrl; // Store the existing image URL when editing
 
   // Constants
   static const double maxImageSizeMB = 5.0;
@@ -44,15 +51,36 @@ class _AddBullScreenState extends State<AddBullScreen> {
   static const List<String> allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.bullToEdit != null) {
+      _isEditMode = true;
+      final bull = widget.bullToEdit!;
+      _nameController.text = bull.name;
+      _priceController.text = bull.price.toStringAsFixed(0);
+      if (bull.ownerName != null) _ownerNameController.text = bull.ownerName!;
+      if (bull.ownerMobile != null) _mobileController.text = bull.ownerMobile!;
+      if (bull.breed != null) _breedController.text = bull.breed!;
+      if (bull.birthYear != null) _birthYearController.text = bull.birthYear.toString();
+      if (bull.color != null) _colorController.text = bull.color!;
+      if (bull.description != null) _descriptionController.text = bull.description!;
+      if (bull.location != null) _locationController.text = bull.location!;
+      _existingImageUrl = bull.imageUrl;
+      _imageUrl = bull.imageUrl;
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _ownerNameController.dispose();
+    _mobileController.dispose();
     _breedController.dispose();
     _birthYearController.dispose();
     _colorController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
-    _mobileController.dispose();
     super.dispose();
   }
 
@@ -173,7 +201,8 @@ class _AddBullScreenState extends State<AddBullScreen> {
       return;
     }
 
-    if (_imageFile == null) {
+    // For create mode, require image. For edit mode, image is optional (can keep existing)
+    if (!_isEditMode && _imageFile == null) {
       _showError('Please select an image');
       return;
     }
@@ -183,24 +212,51 @@ class _AddBullScreenState extends State<AddBullScreen> {
     });
 
     try {
-      await _bullService.createBull(
-        name: _nameController.text.trim(),
-        price: double.parse(_priceController.text.trim()),
-        imageFile: _imageFile,
-        imageXFile: _imageXFile,
-        breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),
-        birthYear: _birthYearController.text.trim().isEmpty ? null : int.tryParse(_birthYearController.text.trim()),
-        color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-        location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-        ownerMobile: _mobileController.text.trim().isEmpty ? null : _mobileController.text.trim(),
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Listing created successfully!'), backgroundColor: AppTheme.successGreen),
+      if (_isEditMode) {
+        // Update existing bull - always send required fields (name, price, owner_name, owner_mobile)
+        await _bullService.updateBull(
+          id: widget.bullToEdit!.id,
+          name: _nameController.text.trim(),
+          price: double.parse(_priceController.text.trim()),
+          ownerName: _ownerNameController.text.trim(), // Required field - always send
+          ownerMobile: _mobileController.text.trim(), // Required field - always send
+          imageFile: _imageFile, // null if not changed
+          imageXFile: _imageXFile,
+          breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),
+          birthYear: _birthYearController.text.trim().isEmpty ? null : int.tryParse(_birthYearController.text.trim()),
+          color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+          location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
         );
-        Navigator.pop(context, true);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Listing updated successfully!'), backgroundColor: AppTheme.successGreen),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        // Create new bull
+        await _bullService.createBull(
+          name: _nameController.text.trim(),
+          price: double.parse(_priceController.text.trim()),
+          ownerName: _ownerNameController.text.trim(),
+          ownerMobile: _mobileController.text.trim(),
+          imageFile: _imageFile,
+          imageXFile: _imageXFile,
+          breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),
+          birthYear: _birthYearController.text.trim().isEmpty ? null : int.tryParse(_birthYearController.text.trim()),
+          color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+          location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Listing created successfully!'), backgroundColor: AppTheme.successGreen),
+          );
+          Navigator.pop(context, true);
+        }
       }
     } catch (e) {
       _showError(e.toString());
@@ -220,7 +276,7 @@ class _AddBullScreenState extends State<AddBullScreen> {
             pinned: true,
             backgroundColor: AppTheme.primaryOrange,
             flexibleSpace: FlexibleSpaceBar(
-              title: const Text('Sell Your Bull', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              title: Text(_isEditMode ? 'Edit Bull' : 'Sell Your Bull', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
               background: Container(
                 decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
@@ -252,6 +308,21 @@ class _AddBullScreenState extends State<AddBullScreen> {
                       keyboardType: TextInputType.number,
                       validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
                     ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _ownerNameController,
+                      label: 'Owner Name',
+                      icon: Icons.person,
+                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _mobileController,
+                      label: 'Contact Mobile',
+                      icon: Icons.phone_android,
+                      keyboardType: TextInputType.phone,
+                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    ),
                     const SizedBox(height: 30),
                     _buildSectionTitle('Optional Details'),
                     const SizedBox(height: 16),
@@ -266,8 +337,6 @@ class _AddBullScreenState extends State<AddBullScreen> {
                     _buildTextField(controller: _colorController, label: 'Color', icon: Icons.palette_outlined),
                     const SizedBox(height: 16),
                     _buildTextField(controller: _locationController, label: 'Location', icon: Icons.location_on_outlined),
-                    const SizedBox(height: 16),
-                    _buildTextField(controller: _mobileController, label: 'Contact Mobile', icon: Icons.phone_android, keyboardType: TextInputType.phone),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _descriptionController,
@@ -290,7 +359,7 @@ class _AddBullScreenState extends State<AddBullScreen> {
                         ),
                         child: _isSubmitting
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Add Listing', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            : Text(_isEditMode ? 'Update Listing' : 'Add Listing', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -319,7 +388,7 @@ class _AddBullScreenState extends State<AddBullScreen> {
                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
           ],
         ),
-        child: _imageFile == null
+        child: _imageFile == null && _imageUrl == null
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -342,18 +411,31 @@ class _AddBullScreenState extends State<AddBullScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: kIsWeb && _imageUrl != null
-                        ? Image.network(_imageUrl!, fit: BoxFit.cover)
-                        : Image.file(_imageFile!, fit: BoxFit.cover),
+                    child: _imageFile != null
+                        ? (kIsWeb && _imageUrl != null
+                            ? Image.network(_imageUrl!, fit: BoxFit.cover)
+                            : Image.file(_imageFile!, fit: BoxFit.cover))
+                        : (_imageUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: _imageUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+                                errorWidget: (_, __, ___) => const Icon(Icons.error),
+                              )
+                            : Container(color: Colors.grey)),
                   ),
                   Positioned(
                     top: 16, right: 16,
                     child: GestureDetector(
-                      onTap: () => setState(() => _imageFile = null),
+                      onTap: () => setState(() {
+                        _imageFile = null;
+                        _imageXFile = null;
+                        if (!_isEditMode) _imageUrl = null; // Only clear URL in create mode
+                      }),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                        child: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        child: Icon(_isEditMode && _imageFile == null ? Icons.edit : Icons.delete, color: Colors.red, size: 20),
                       ),
                     ),
                   ),

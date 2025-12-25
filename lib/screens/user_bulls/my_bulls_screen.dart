@@ -3,6 +3,7 @@ import '../../config/theme.dart';
 import '../../models/user_bull_sell.dart';
 import '../../services/user_bull_service.dart';
 import 'add_bull_screen.dart';
+import 'bull_detail_screen.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -44,6 +45,30 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  void _openBullDetails(UserBullSell bull) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BullDetailScreen(bull: bull),
+      ),
+    );
+    if (result == true) {
+      _loadBulls();
+    }
+  }
+
+  Future<void> _editBull(UserBullSell bull) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddBullScreen(bullToEdit: bull),
+      ),
+    );
+    if (result == true) {
+      _loadBulls();
     }
   }
 
@@ -91,7 +116,27 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F8),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppTheme.primaryOrange,
+                    strokeWidth: 3,
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'नाद एकच… बैलगाडा!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryOrange,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            )
           : _error != null
               ? _buildErrorState()
               : CustomScrollView(
@@ -108,9 +153,15 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
                       else
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-                          sliver: SliverList(
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.75,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
                             delegate: SliverChildBuilderDelegate(
-                              (context, index) => _buildBullCard(_bullsList!.bulls[index], index),
+                              (context, index) => _buildCompactBullCard(_bullsList!.bulls[index], index),
                               childCount: _bullsList!.bulls.length,
                             ),
                           ),
@@ -237,6 +288,132 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
     );
   }
 
+  Widget _buildCompactBullCard(UserBullSell bull, int index) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 400 + (index * 100).clamp(0, 500)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Opacity(opacity: value, child: child),
+        );
+      },
+      child: GestureDetector(
+        onTap: () => _openBullDetails(bull),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Section
+              Expanded(
+                flex: 3,
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Container(
+                        width: double.infinity,
+                        color: Colors.grey.shade100,
+                        child: bull.imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: bull.imageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => Container(color: Colors.grey.shade100),
+                                errorWidget: (_, __, ___) => const Icon(Icons.image_not_supported),
+                              )
+                            : const Icon(Icons.image_not_supported),
+                      ),
+                    ),
+                    // Status Badge
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: _buildStatusChip(bull),
+                    ),
+                    // Price Tag
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          bull.formattedPriceShort,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Info Section
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        bull.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      if (bull.ownerName != null)
+                        Row(
+                          children: [
+                            Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                bull.ownerName!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBullCard(UserBullSell bull, int index) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -343,20 +520,37 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
                     ],
                   ),
                    const SizedBox(height: 16),
-                   SizedBox(
-                     width: double.infinity,
-                     child: OutlinedButton.icon(
-                       onPressed: () => _deleteBull(bull.id),
-                       icon: const Icon(Icons.delete_outline, size: 18),
-                       label: const Text('Delete Listing'),
-                       style: OutlinedButton.styleFrom(
-                         foregroundColor: AppTheme.errorRed,
-                         side: const BorderSide(color: AppTheme.errorRed),
-                         padding: const EdgeInsets.symmetric(vertical: 12),
-                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                       ),
-                     ),
-                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _editBull(bull),
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: const Text('Edit'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primaryOrange,
+                            side: const BorderSide(color: AppTheme.primaryOrange),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _deleteBull(bull.id),
+                          icon: const Icon(Icons.delete_outline, size: 18),
+                          label: const Text('Delete'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.errorRed,
+                            side: const BorderSide(color: AppTheme.errorRed),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

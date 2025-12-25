@@ -66,7 +66,27 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
 
               if (isLoading)
                 const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: AppTheme.primaryOrange,
+                          strokeWidth: 3,
+                        ),
+                        SizedBox(height: 24),
+                        Text(
+                          'नाद एकच… बैलगाडा!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryOrange,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 )
               else if (error != null)
                 SliverFillRemaining(

@@ -81,8 +81,28 @@ class _HomeTabState extends State<HomeTab> {
               _buildSliverAppBar(currentUser),
               
               if (isLoading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(
+                          color: AppTheme.primaryOrange,
+                          strokeWidth: 3,
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'नाद एकच… बैलगाडा!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryOrange,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 )
               else if (error != null)
                 SliverFillRemaining(
@@ -114,11 +134,19 @@ class _HomeTabState extends State<HomeTab> {
                         const SizedBox(height: 32),
                       ],
 
+                      // Decorative Quote Section (between sections)
+                      if (recentRaces.isNotEmpty && upcomingRaces.isNotEmpty)
+                        _buildDecorativeQuote(),
+
                       // Upcoming Races Section
                       if (upcomingRaces.isNotEmpty) ...[
                         _buildSectionHeader(context.watch<LanguageProvider>().getText('upcoming_races'), Icons.calendar_month_outlined),
                         _buildRaceList(upcomingRaces, isRecent: false),
                       ],
+
+                      // Footer Quote (at end of all content)
+                      if (recentRaces.isNotEmpty || upcomingRaces.isNotEmpty)
+                        _buildFooterQuote(),
 
                       // Empty State
                       if (recentRaces.isEmpty && upcomingRaces.isEmpty)
@@ -412,27 +440,240 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
   
+  Widget _buildFooterQuote() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
+      child: Column(
+        children: [
+          // Divider
+          Container(
+            height: 1,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.grey.shade300,
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+
+          // Quote with icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                color: AppTheme.primaryOrange,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  'नाद जपणारे व्यासपीठ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.auto_awesome,
+                color: AppTheme.primaryOrange,
+                size: 20,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // App name
+          Text(
+            'Naad Bailgada',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDecorativeQuote() {
+    final quotes = [
+      {'text': 'शर्यत नाही, हा आहे नाद!', 'icon': Icons.campaign},
+      {'text': 'बैलगाडा संस्कृतीचा डिजिटल अभिमान', 'icon': Icons.workspace_premium},
+      {'text': 'बैलांची ताकद… शेतकऱ्याचा अभिमान', 'icon': Icons.celebration},
+    ];
+
+    final randomQuote = quotes[DateTime.now().hour % quotes.length];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOut,
+        builder: (context, value, child) {
+          return Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: Opacity(
+              opacity: value,
+              child: child,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF6B35), Color(0xFFFF8C61)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryOrange.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  randomQuote['icon'] as IconData,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  randomQuote['text'] as String,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.3,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
+    final quotes = [
+      'पिढ्यानपिढ्या चाललेला नाद',
+      'संस्कृती धावते, तेव्हा बैलगाडा धावतो',
+      'रक्तात माती, नादात बैलगाडा',
+      'गावाचा थरार, बैलगाड्यांचा नाद',
+      'नाद जपणारे व्यासपीठ',
+    ];
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 80),
+        padding: const EdgeInsets.only(top: 60),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryOrange.withOpacity(0.1),
+                    AppTheme.primaryOrange.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.emoji_events_outlined, size: 56, color: Colors.grey.shade400),
+              child: Icon(Icons.emoji_events_outlined, size: 56, color: AppTheme.primaryOrange.withOpacity(0.6)),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               context.watch<LanguageProvider>().getText('no_races'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Rotating Quote Card
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 40),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryOrange.withOpacity(0.15),
+                    AppTheme.primaryOrange.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.primaryOrange.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOut,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.scale(
+                      scale: 0.8 + (0.2 * value),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.format_quote,
+                      color: AppTheme.primaryOrange.withOpacity(0.5),
+                      size: 32,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      quotes[DateTime.now().second % quotes.length],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textDark,
+                        height: 1.4,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

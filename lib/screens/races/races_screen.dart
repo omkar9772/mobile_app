@@ -87,7 +87,27 @@ class _RacesScreenState extends State<RacesScreen> {
       body: Consumer<RaceProvider>(
         builder: (context, provider, child) {
           if (provider.isLoadingAll) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppTheme.primaryOrange,
+                    strokeWidth: 3,
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'नाद एकच… बैलगाडा!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryOrange,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           if (provider.errorAll != null) {

@@ -21,53 +21,93 @@ class _BannerCarouselState extends State<BannerCarousel> {
   int _currentPage = 0;
   Timer? _timer;
 
-  // Banner data: quotes, images, and CTAs
+  // Banner data: quotes, images, and CTAs - Enhanced with powerful new slogans
   final List<BannerData> _banners = [
     BannerData(
-      quoteMarathi: 'आमच्यासाठी एकच नाद आहे—\nबैलगाडा शर्यत!',
-      quoteEnglish: 'There is only one passion —\nBullock Cart Racing',
+      quoteMarathi: 'नाद एकच… बैलगाडा!',
       gradient: const LinearGradient(
         colors: [Color(0xFFFF6B35), Color(0xFFFF8C61)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      icon: Icons.campaign,
+    ),
+    BannerData(
+      quoteMarathi: 'ही शर्यत नाही,\nही परंपरा आहे',
+      gradient: const LinearGradient(
+        colors: [Color(0xFF5E35B1), Color(0xFF9575CD)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      icon: Icons.account_balance,
+    ),
+    BannerData(
+      quoteMarathi: 'बैलगाडा शर्यतीचा नाद,\nआता तुमच्या मोबाईलमध्ये',
+      gradient: const LinearGradient(
+        colors: [Color(0xFF1976D2), Color(0xFF42A5F5)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      icon: Icons.smartphone,
+    ),
+    BannerData(
+      quoteMarathi: 'बैल नाही,\nतो आमचा अभिमान आहे',
+      gradient: const LinearGradient(
+        colors: [Color(0xFFD32F2F), Color(0xFFEF5350)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
       icon: Icons.emoji_events,
     ),
     BannerData(
-      quoteMarathi: 'वेग नाही, पण जिद्द आहे!',
-      quoteEnglish: 'Not just speed,\nbut determination!',
+      quoteMarathi: 'मातीचा सुगंध,\nबैलांचा वेग!',
       gradient: const LinearGradient(
-        colors: [Color(0xFFF7B801), Color(0xFFFFD700)],
+        colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
       icon: Icons.flash_on,
     ),
     BannerData(
-      quoteMarathi: 'माती, बैल आणि स्पर्धा—\nहेच आमचे जीवन!',
-      quoteEnglish: 'Soil, Bulls & Competition—\nThis is our life!',
+      quoteMarathi: 'गाव ते ग्लोबल –\nNaad Bailgada',
       gradient: const LinearGradient(
-        colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
+        colors: [Color(0xFFF57C00), Color(0xFFFFB74D)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      icon: Icons.grass,
+      icon: Icons.public,
     ),
     BannerData(
-      quoteMarathi: 'परंपरा आणि पराक्रम!',
-      quoteEnglish: 'Tradition & Valor!',
+      quoteMarathi: 'जिथे ताकद, शौर्य आणि\nनाद एकत्र येतो',
       gradient: const LinearGradient(
-        colors: [Color(0xFF5E35B1), Color(0xFF9575CD)],
+        colors: [Color(0xFF7B1FA2), Color(0xFFBA68C8)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      icon: Icons.castle,
+      icon: Icons.shield,
     ),
     BannerData(
-      quoteMarathi: 'शेतकऱ्यांची शक्ती,\nबैलगाड्यांचा वेग!',
-      quoteEnglish: "Farmer's strength,\nCart's speed!",
+      quoteMarathi: 'बैलगाडा म्हणजे केवळ वेग नाही,\nतो आहे वारसा',
       gradient: const LinearGradient(
-        colors: [Color(0xFFD32F2F), Color(0xFFEF5350)],
+        colors: [Color(0xFFC2185B), Color(0xFFF06292)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      icon: Icons.auto_awesome,
+    ),
+    BannerData(
+      quoteMarathi: 'मातीशी नातं,\nबैलाशी नाद',
+      gradient: const LinearGradient(
+        colors: [Color(0xFF6D4C41), Color(0xFFA1887F)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      icon: Icons.nature_people,
+    ),
+    BannerData(
+      quoteMarathi: 'बैलाची ताकद,\nशेतकऱ्याची ओळख',
+      gradient: const LinearGradient(
+        colors: [Color(0xFF00796B), Color(0xFF4DB6AC)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -216,29 +256,13 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   child: Text(
                     banner.quoteMarathi,
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      height: 1.2,
-                      letterSpacing: 0.3,
+                      height: 1.3,
+                      letterSpacing: 0.5,
                     ),
                     maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(height: 6),
-
-                // English Translation - Flexible to prevent overflow
-                Flexible(
-                  child: Text(
-                    banner.quoteEnglish,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.9),
-                      fontStyle: FontStyle.italic,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -302,7 +326,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'अधिक पहा! / See More!',
+                  'शर्यत पहा, वेळ मोजा, नाद जपा',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -311,7 +335,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Login to explore races, champions & more',
+                  'Login करा आणि संपूर्ण अनुभव घ्या',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade600,
@@ -348,13 +372,11 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
 class BannerData {
   final String quoteMarathi;
-  final String quoteEnglish;
   final Gradient gradient;
   final IconData icon;
 
   BannerData({
     required this.quoteMarathi,
-    required this.quoteEnglish,
     required this.gradient,
     required this.icon,
   });

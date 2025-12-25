@@ -110,7 +110,7 @@ class _BullsScreenState extends State<BullsScreen> {
                       padding: const EdgeInsets.all(16),
                       child: Center(
                         child: Text(
-                          'No more bulls',
+                          'No more champions',
                           style: TextStyle(
                             color: AppTheme.textLight,
                             fontSize: 14,
