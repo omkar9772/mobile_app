@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,17 +18,40 @@ class AvailableBullsScreen extends StatefulWidget {
 
 class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
   final ScrollController _scrollController = ScrollController();
+  int _currentQuoteIndex = 0;
+  Timer? _quoteTimer;
+
+  final List<String> _quotes = [
+    'खरेदी करा शान… मिळवा विजयाचं मान',
+    'खरेदी करा विश्वासाने… जिंका सहजतेने',
+    'निवडा उद्याचा हिंद केसरी आणि बनवा घाटाचा राजा',
+    'थेट मालकाशी बोला… सौदा पक्का करा',
+    'बैलगाडा शर्यत… महाराष्ट्राची शान!',
+    'उत्तम बैल… विजयाची पहिली पायरी',
+  ];
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _startQuoteTimer();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _quoteTimer?.cancel();
     super.dispose();
+  }
+
+  void _startQuoteTimer() {
+    _quoteTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentQuoteIndex = (_currentQuoteIndex + 1) % _quotes.length;
+        });
+      }
+    });
   }
 
   void _onScroll() {
@@ -151,10 +175,19 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
   Widget _buildSliverAppBar(MarketplaceProvider provider) {
     final lang = context.watch<LanguageProvider>();
     return SliverAppBar(
-      expandedHeight: 120.0,
+      expandedHeight: 140.0,
       floating: true,
       pinned: true,
       backgroundColor: AppTheme.primaryOrange,
+      title: Text(
+        lang.getText('marketplace'),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+      centerTitle: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh, color: Colors.white),
@@ -162,22 +195,63 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-        title: Text(
-          lang.getText('marketplace'),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
         background: Stack(
           fit: StackFit.expand,
           children: [
              Container(decoration: const BoxDecoration(gradient: AppTheme.primaryGradient)),
              Positioned(
-               right: -30, top: -20,
-               child: Icon(Icons.shopping_bag_outlined, size: 150, color: Colors.white.withOpacity(0.1)),
+               right: -20, top: 40,
+               child: Icon(Icons.shopping_bag_outlined, size: 140, color: Colors.white.withOpacity(0.08)),
+             ),
+             // Animated Catchy Quotes
+             Positioned(
+               left: 16,
+               right: 16,
+               bottom: 16,
+               child: Center(
+                 child: Container(
+                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                   decoration: BoxDecoration(
+                     color: Colors.white.withOpacity(0.15),
+                     borderRadius: BorderRadius.circular(20),
+                     border: Border.all(color: Colors.white.withOpacity(0.2)),
+                     boxShadow: [
+                       BoxShadow(
+                         color: Colors.black.withOpacity(0.05),
+                         blurRadius: 10,
+                         offset: const Offset(0, 4),
+                       )
+                     ]
+                   ),
+                   child: AnimatedSwitcher(
+                     duration: const Duration(milliseconds: 500),
+                     transitionBuilder: (Widget child, Animation<double> animation) {
+                       return FadeTransition(opacity: animation, child: SlideTransition(
+                         position: Tween<Offset>(begin: const Offset(0.0, 0.5), end: Offset.zero).animate(animation),
+                         child: child,
+                       ));
+                     },
+                     child: Text(
+                       _quotes[_currentQuoteIndex],
+                       key: ValueKey<int>(_currentQuoteIndex),
+                       textAlign: TextAlign.center,
+                       style: const TextStyle(
+                         color: Colors.white,
+                         fontSize: 13,
+                         fontWeight: FontWeight.w600,
+                         letterSpacing: 0.5,
+                         shadows: [
+                           Shadow(
+                             offset: Offset(0, 1),
+                             blurRadius: 2,
+                             color: Colors.black12,
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
              ),
           ],
         ),

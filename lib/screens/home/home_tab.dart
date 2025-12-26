@@ -121,7 +121,16 @@ class _HomeTabState extends State<HomeTab> {
                         onLoginTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+                              transitionDuration: const Duration(milliseconds: 200),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -326,7 +335,16 @@ class _HomeTabState extends State<HomeTab> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+                      transitionDuration: const Duration(milliseconds: 200),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
+                    ),
                   );
                 },
               );
@@ -690,10 +708,17 @@ class _HomeTabState extends State<HomeTab> {
     if (!isLoggedIn) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => LoginScreen(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(
             redirectToScreen: RaceDaysScreen(race: race),
           ),
+          transitionDuration: const Duration(milliseconds: 200),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
         ),
       );
       return;

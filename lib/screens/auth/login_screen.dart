@@ -383,7 +383,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 onPressed: () {
                    // Implement forgot password if needed
                    ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(content: Text(lang.getText('contact_admin_reset'))),
+                     const SnackBar(
+                       content: Text('Please contact info@naadbailgada.com to reset your password'),
+                       duration: Duration(seconds: 4),
+                     ),
                    );
                 },
                 child: Text(lang.getText('forgot_password'), style: TextStyle(color: Colors.grey.shade600)),

@@ -162,6 +162,10 @@ class ApiService {
   Map<String, dynamic> handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      // Token expired or unauthorized - logout user
+      _handleUnauthorized();
+      throw Exception('Session expired. Please login again.');
     } else {
       final error = jsonDecode(response.body);
       throw Exception(error['detail'] ?? 'Request failed');
@@ -171,9 +175,18 @@ class ApiService {
   List<dynamic> handleListResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body) as List;
+    } else if (response.statusCode == 401) {
+      // Token expired or unauthorized - logout user
+      _handleUnauthorized();
+      throw Exception('Session expired. Please login again.');
     } else {
       final error = jsonDecode(response.body);
       throw Exception(error['detail'] ?? 'Request failed');
     }
+  }
+
+  /// Handle unauthorized (401) responses by clearing stored credentials
+  Future<void> _handleUnauthorized() async {
+    await _secureStorage.clearAll();
   }
 }

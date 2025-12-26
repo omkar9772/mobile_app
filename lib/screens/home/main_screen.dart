@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../config/theme.dart';
 import 'home_tab.dart';
 import '../races/races_screen.dart';
@@ -49,6 +50,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) {
+    // Add haptic feedback on tab tap
+    HapticFeedback.lightImpact();
+
     final authProvider = context.read<AuthProvider>();
     final isLoggedIn = authProvider.isLoggedIn;
 
@@ -56,8 +60,16 @@ class _MainScreenState extends State<MainScreen> {
     if (!isLoggedIn && index != 0) {
       // Show login screen with redirect info
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => LoginScreen(redirectTabIndex: index),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              LoginScreen(redirectTabIndex: index),
+          transitionDuration: const Duration(milliseconds: 200),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
         ),
       );
       return;
@@ -135,13 +147,27 @@ class _MainScreenState extends State<MainScreen> {
           );
         }
 
+        // Ensure selected index is valid (handle logout from Profile tab)
+        final int safeIndex = _selectedIndex >= navItems.length ? 0 : _selectedIndex;
+
+        // Reset state if out of bounds
+        if (_selectedIndex >= navItems.length) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedIndex = 0;
+              });
+            }
+          });
+        }
+
         return Scaffold(
           body: IndexedStack(
-            index: _selectedIndex,
+            index: safeIndex,
             children: _screens,
           ),
           bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex,
+            currentIndex: safeIndex,
             onTap: _onItemTapped,
             type: BottomNavigationBarType.fixed,
             selectedItemColor: AppTheme.primaryOrange,

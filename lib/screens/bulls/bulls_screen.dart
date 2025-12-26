@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/bull_provider.dart';
+import '../../providers/owner_provider.dart';
 import 'champions_list_view.dart';
 import 'owners_list_view.dart';
 
@@ -27,6 +29,16 @@ class _BullsScreenState extends State<BullsScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
+  void _handleRefresh() {
+    if (_tabController.index == 0) {
+      // Champions tab - refresh bulls
+      context.read<BullProvider>().loadBulls();
+    } else {
+      // Owners tab - refresh owners
+      context.read<OwnerProvider>().loadOwners();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<LanguageProvider>();
@@ -40,8 +52,15 @@ class _BullsScreenState extends State<BullsScreen> with SingleTickerProviderStat
               floating: true,
               pinned: true,
               backgroundColor: AppTheme.primaryOrange,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  onPressed: _handleRefresh,
+                ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 16, bottom: 56),
+                centerTitle: true,
+                titlePadding: const EdgeInsets.only(bottom: 56),
                 title: Text(
                   lang.getText('nav_community'),
                   style: const TextStyle(
