@@ -40,13 +40,43 @@ class _MainScreenState extends State<MainScreen> {
     // Set initial tab index if provided
     _selectedIndex = widget.initialTabIndex ?? 0;
 
-    // Load Home races by default when app starts
+    // Load data for the initial tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final raceProvider = context.read<RaceProvider>();
-      if (!raceProvider.isLoadedHome) {
-        raceProvider.loadHomeRaces();
-      }
+      _loadDataForTab(_selectedIndex);
     });
+  }
+
+  void _loadDataForTab(int index) {
+    // Lazy load data based on tab selection
+    switch (index) {
+      case 0: // Home
+        final raceProvider = context.read<RaceProvider>();
+        if (!raceProvider.isLoadedHome) {
+          raceProvider.loadHomeRaces();
+        }
+        break;
+      case 1: // Races
+        final raceProvider = context.read<RaceProvider>();
+        if (!raceProvider.isLoadedAll) {
+          raceProvider.loadAllRaces();
+        }
+        break;
+      case 2: // Community (Bulls/Owners)
+        final bullProvider = context.read<BullProvider>();
+        if (!bullProvider.isLoaded) {
+          bullProvider.loadBulls();
+        }
+        break;
+      case 3: // Available Bulls (Marketplace)
+        final marketplaceProvider = context.read<MarketplaceProvider>();
+        if (!marketplaceProvider.isLoaded) {
+          marketplaceProvider.loadListings();
+        }
+        break;
+      case 4: // Profile
+        // Profile data usually loaded on app start or handled within screen
+        break;
+    }
   }
 
   void _onItemTapped(int index) {
@@ -79,36 +109,8 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
 
-    // Lazy load data based on tab selection
-    switch (index) {
-      case 0: // Home
-        final raceProvider = context.read<RaceProvider>();
-        if (!raceProvider.isLoadedHome) {
-          raceProvider.loadHomeRaces();
-        }
-        break;
-      case 1: // Races
-        final raceProvider = context.read<RaceProvider>();
-        if (!raceProvider.isLoadedAll) {
-          raceProvider.loadAllRaces();
-        }
-        break;
-      case 2: // Community (Bulls/Owners)
-        final bullProvider = context.read<BullProvider>();
-        if (!bullProvider.isLoaded) {
-          bullProvider.loadBulls();
-        }
-        break;
-      case 3: // Available Bulls (Marketplace)
-        final marketplaceProvider = context.read<MarketplaceProvider>();
-        if (!marketplaceProvider.isLoaded) {
-          marketplaceProvider.loadListings();
-        }
-        break;
-      case 4: // Profile
-        // Profile data usually loaded on app start or handled within screen
-        break;
-    }
+    // Load data for the selected tab
+    _loadDataForTab(index);
   }
 
   @override

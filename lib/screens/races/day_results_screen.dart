@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/race.dart';
@@ -227,9 +228,16 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      result.getFormattedTime(),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.timer_outlined, size: 14, color: Colors.grey.shade800),
+                        const SizedBox(width: 4),
+                        Text(
+                          result.getFormattedTime(),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
                     ),
                   ),
               ],
@@ -304,21 +312,31 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
              ),
              child: ClipOval(
                child: photoUrl != null
-                 ? CachedNetworkImage(imageUrl: photoUrl, fit: BoxFit.cover, errorWidget: (_,__,___) => const Icon(Icons.pets, size: 32))
-                 : const Icon(Icons.pets, size: 32, color: Colors.grey),
+                 ? CachedNetworkImage(
+                     imageUrl: photoUrl,
+                     fit: BoxFit.cover,
+                     errorWidget: (_,__,___) => Padding(
+                       padding: const EdgeInsets.all(8.0),
+                       child: SvgPicture.asset('assets/images/logo.svg', fit: BoxFit.contain),
+                     ),
+                   )
+                 : Padding(
+                     padding: const EdgeInsets.all(8.0),
+                     child: SvgPicture.asset('assets/images/logo.svg', fit: BoxFit.contain),
+                   ),
              ),
           ),
           const SizedBox(height: 8),
           Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            name == 'Unknown' ? 'Contact admin to add image' : name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
             textAlign: TextAlign.center,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           const Text(
-            'Bull',
+            'Champion',
             style: TextStyle(fontSize: 10, color: Colors.grey),
           ),
         ],

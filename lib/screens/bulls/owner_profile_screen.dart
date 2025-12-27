@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../models/owner.dart';
@@ -161,13 +162,27 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              owner.name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textDark,
-              ),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    owner.name,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark,
+                    ),
+                  ),
+                ),
+                if (owner.photoUrl != null) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.verified,
+                    size: 24,
+                    color: Colors.blue,
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 16),
 
@@ -191,9 +206,28 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
             ],
 
             if (owner.bullCount != null)
-              _buildInfoRow(
-                Icons.pets,
-                '${owner.bullCount} Champion${owner.bullCount != 1 ? 's' : ''}',
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      width: 20,
+                      height: 20,
+                      colorFilter: const ColorFilter.mode(AppTheme.primaryOrange, BlendMode.srcIn),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${owner.bullCount} Champion${owner.bullCount != 1 ? 's' : ''}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
           ],
         ),

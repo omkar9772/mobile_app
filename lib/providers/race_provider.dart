@@ -117,7 +117,8 @@ class RaceProvider extends ChangeNotifier {
 
     try {
       // OPTIMIZED: Single API call instead of 2 separate calls (79% faster)
-      final dashboard = await _raceService.getDashboard(recentLimit: 4, upcomingLimit: 4);
+      // Returns 4 recent races and 4 upcoming races
+      final dashboard = await _raceService.getDashboard();
 
       _recentRaces = dashboard['recent']!;
       _upcomingRaces = dashboard['upcoming']!;

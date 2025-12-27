@@ -189,7 +189,7 @@ class _RaceDaysScreenState extends State<RaceDaysScreen> {
       ],
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: false,
-        titlePadding: const EdgeInsets.only(left: 20, bottom: 16, right: 20),
+        titlePadding: const EdgeInsets.only(left: 56, bottom: 16, right: 20),
         title: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

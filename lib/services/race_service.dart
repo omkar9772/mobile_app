@@ -29,9 +29,10 @@ class RaceService {
 
   /// OPTIMIZED: Get both recent and upcoming races in single API call
   /// 79% faster than separate calls (1.2s vs 5.8s)
-  Future<Map<String, List<Race>>> getDashboard({int recentLimit = 4, int upcomingLimit = 4}) async {
+  /// Returns 4 recent races and 4 upcoming races
+  Future<Map<String, List<Race>>> getDashboard() async {
     try {
-      final endpoint = '/public/dashboard?recent_limit=$recentLimit&upcoming_limit=$upcomingLimit';
+      final endpoint = '/public/dashboard';
       final response = await _apiService.get(endpoint);
       final data = _apiService.handleResponse(response);
 

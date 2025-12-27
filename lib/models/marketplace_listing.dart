@@ -3,7 +3,7 @@ class MarketplaceListing {
   final String name;
   final String ownerName;
   final String ownerMobile;
-  final String location;
+  final String? location;
   final double price;
   final String? imageUrl;
   final String? description;
@@ -15,7 +15,7 @@ class MarketplaceListing {
     required this.name,
     required this.ownerName,
     required this.ownerMobile,
-    required this.location,
+    this.location,
     required this.price,
     this.imageUrl,
     this.description,

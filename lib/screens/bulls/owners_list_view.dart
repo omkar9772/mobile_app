@@ -284,15 +284,29 @@ class _OwnersListViewState extends State<OwnersListView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      owner.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textDark,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            owner.name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (owner.photoUrl != null) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.verified,
+                            size: 16,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      ],
                     ),
 
                     if (owner.address != null)

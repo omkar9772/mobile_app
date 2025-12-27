@@ -332,6 +332,44 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                         ),
                       ),
                     ),
+                    if (listing.imageUrl != null)
+                      Positioned(
+                        top: 8, left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.green.shade400, Colors.green.shade700],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified_user, color: Colors.white, size: 12),
+                              SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -359,7 +397,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            listing.location,
+                            listing.location ?? 'Location not specified',
                             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -415,10 +453,48 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                               ? CachedNetworkImage(
                                   imageUrl: listing.imageUrl!,
                                   fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
                                 )
                               : Container(color: Colors.grey.shade200),
                         ),
                       ),
+                      if (listing.imageUrl != null)
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.green.shade400, Colors.green.shade700],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified_user, color: Colors.white, size: 16),
+                              SizedBox(width: 6),
+                              Text(
+                                'Verified Listing',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -440,7 +516,7 @@ class _AvailableBullsScreenState extends State<AvailableBullsScreen> {
                         children: [
                           const Icon(Icons.location_on, color: Colors.grey),
                           const SizedBox(width: 8),
-                          Text(listing.location, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                          Text(listing.location ?? 'Location not specified', style: const TextStyle(fontSize: 16, color: Colors.grey)),
                         ],
                       ),
                       const SizedBox(height: 24),

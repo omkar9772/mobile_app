@@ -197,7 +197,8 @@ class _MyBullsScreenState extends State<MyBullsScreen> {
       pinned: true,
       backgroundColor: AppTheme.primaryOrange,
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.only(left: 60, bottom: 16), // Offset for back button
+        centerTitle: true,
+        titlePadding: const EdgeInsets.only(bottom: 16),
         title: const Text(
           'My Listings',
           style: TextStyle(

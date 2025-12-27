@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../config/app_config.dart';
 import '../../models/bull.dart';
@@ -277,12 +278,18 @@ class _ChampionsListViewState extends State<ChampionsListView> {
                               ),
                               errorWidget: (context, url, error) => Container(
                                 color: Colors.grey.shade50,
-                                child: Icon(Icons.pets, color: Colors.grey.shade300, size: 32),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SvgPicture.asset('assets/images/logo.svg', colorFilter: ColorFilter.mode(Colors.grey.shade300, BlendMode.srcIn)),
+                                ),
                               ),
                             )
                           : Container(
                               color: Colors.grey.shade50,
-                              child: Icon(Icons.pets, color: Colors.grey.shade300, size: 32),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: SvgPicture.asset('assets/images/logo.svg', colorFilter: ColorFilter.mode(Colors.grey.shade300, BlendMode.srcIn)),
+                              ),
                             ),
                     ),
                   ),
@@ -299,6 +306,28 @@ class _ChampionsListViewState extends State<ChampionsListView> {
                           bull.breed!,
                           style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500),
                         ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8, left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.workspace_premium, color: Colors.white, size: 14),
                       ),
                     ),
                 ],
@@ -398,7 +427,13 @@ class _ChampionsListViewState extends State<ChampionsListView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.pets, size: 64, color: Colors.grey.shade300),
+          SvgPicture.asset(
+            'assets/images/logo.svg',
+            width: 64,
+            height: 64,
+            colorFilter: ColorFilter.mode(Colors.grey.shade300, BlendMode.srcIn),
+          ),
+          const SizedBox(height: 16),
           const SizedBox(height: 16),
           Text(
             _searchController.text.isEmpty

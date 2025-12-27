@@ -209,6 +209,46 @@ class _BullDetailScreenState extends State<BullDetailScreen> {
                       ],
 
                       const SizedBox(height: 24),
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3F2FD),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFF90CAF9).withOpacity(0.5)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.info_outline_rounded, size: 20, color: Color(0xFF1976D2)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Listing Expiration',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1976D2),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Your listing will be automatically removed 30 days after upload date.',
+                                    style: TextStyle(
+                                      color: const Color(0xFF1976D2).withOpacity(0.8),
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       _buildDetailRow(Icons.access_time, 'Days Remaining', '${widget.bull.daysRemaining} days'),
 
                       const SizedBox(height: 32),

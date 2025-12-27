@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../config/theme.dart';
 import '../../services/user_bull_service.dart';
@@ -275,9 +276,10 @@ class _AddBullScreenState extends State<AddBullScreen> {
             expandedHeight: 100.0,
             pinned: true,
             backgroundColor: AppTheme.primaryOrange,
+            centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(_isEditMode ? 'Edit Bull' : 'Sell Your Bull', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
+              centerTitle: true,
               background: Container(
                 decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
               ),
@@ -306,7 +308,12 @@ class _AddBullScreenState extends State<AddBullScreen> {
                       label: 'Price (₹)',
                       icon: Icons.currency_rupee,
                       keyboardType: TextInputType.number,
-                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (v) {
+                        if (v?.isEmpty ?? true) return 'Required';
+                        if (double.tryParse(v!) == null || double.parse(v) <= 0) return 'Invalid price';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
@@ -321,7 +328,15 @@ class _AddBullScreenState extends State<AddBullScreen> {
                       label: 'Contact Mobile',
                       icon: Icons.phone_android,
                       keyboardType: TextInputType.phone,
-                      validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      validator: (v) {
+                        if (v?.isEmpty ?? true) return 'Required';
+                        if (v!.length != 10) return 'Enter valid 10-digit number';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 30),
                     _buildSectionTitle('Optional Details'),
@@ -330,7 +345,25 @@ class _AddBullScreenState extends State<AddBullScreen> {
                       children: [
                         Expanded(child: _buildTextField(controller: _breedController, label: 'Breed', icon: Icons.category_outlined)),
                         const SizedBox(width: 16),
-                        Expanded(child: _buildTextField(controller: _birthYearController, label: 'Birth Year', icon: Icons.calendar_today, keyboardType: TextInputType.number)),
+                        Expanded(child: _buildTextField(
+                          controller: _birthYearController, 
+                          label: 'Birth Year', 
+                          icon: Icons.calendar_today, 
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(4),
+                          ],
+                          validator: (v) {
+                             if (v != null && v.isNotEmpty) {
+                               if (v.length != 4) return 'Invalid year';
+                               int year = int.tryParse(v) ?? 0;
+                               int currentYear = DateTime.now().year;
+                               if (year < 1990 || year > currentYear) return 'Invalid year';
+                             }
+                             return null;
+                          },
+                        )),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -479,6 +512,7 @@ class _AddBullScreenState extends State<AddBullScreen> {
     TextInputType? keyboardType,
     int maxLines = 1,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -493,6 +527,7 @@ class _AddBullScreenState extends State<AddBullScreen> {
         keyboardType: keyboardType,
         maxLines: maxLines,
         validator: validator,
+        inputFormatters: inputFormatters,
         style: const TextStyle(fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: label,
