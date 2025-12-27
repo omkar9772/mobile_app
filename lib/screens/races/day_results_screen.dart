@@ -104,7 +104,7 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
             mimeType: 'image/png',
             name: 'race_result_${result.id}.png'
           )],
-          text: 'Check out this race result on Naad Bailgada! 🐂💨',
+          text: 'Check out this race result on Naad Bailgada!',
         );
       } else {
         // Mobile: Save to temp file
@@ -114,7 +114,7 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
 
         await Share.shareXFiles(
           [XFile(tempFile.path)],
-          text: 'Check out this race result on Naad Bailgada! 🐂💨',
+          text: 'Check out this race result on Naad Bailgada!',
         );
 
         // Clean up temporary file after sharing

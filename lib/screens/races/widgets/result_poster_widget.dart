@@ -191,11 +191,11 @@ class RaceResultPoster extends StatelessWidget {
                           child: _buildBullItem(result.bull1Name, result.bull1PhotoUrl),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Icon(
                             Icons.bolt_rounded,
-                            size: 24,
-                            color: AppTheme.primaryOrange.withOpacity(0.4),
+                            size: 72,
+                            color: AppTheme.primaryOrange.withOpacity(0.8),
                           ),
                         ),
                         Expanded(
@@ -219,9 +219,9 @@ class RaceResultPoster extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'बैलगाडा मालक',
+                        '|| बैलगाडा मालक ||',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryOrange.withOpacity(0.8),
                           letterSpacing: 1.0,
@@ -263,7 +263,7 @@ class RaceResultPoster extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: 15,
                 ),
               ),
             ],
@@ -302,7 +302,7 @@ class RaceResultPoster extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          name == 'Unknown' ? '-' : name,
+          name == 'Unknown' ? '' : name,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13,
@@ -316,7 +316,7 @@ class RaceResultPoster extends StatelessWidget {
         const Text(
           'Champion',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 12,
             color: AppTheme.textLight,
             letterSpacing: 0.5,
           ),
@@ -330,7 +330,7 @@ class RaceResultPoster extends StatelessWidget {
       color: Colors.grey.shade100,
       padding: const EdgeInsets.all(16),
       child: Opacity(
-        opacity: 0.3,
+        opacity: 0.9,
         child: SvgPicture.asset(
           'assets/images/logo.svg',
           fit: BoxFit.contain,
@@ -364,7 +364,7 @@ class textLogo extends StatelessWidget {
           ),
         ),
         Text(
-          'बैलगाडा!',
+          'बैलगाडा !',
           style: TextStyle(
             fontSize: 23,
             color: Colors.white,
