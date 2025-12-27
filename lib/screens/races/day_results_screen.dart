@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,11 @@ import '../../models/bull.dart';
 import '../../utils/date_helper.dart';
 import '../bulls/bull_detail_screen.dart';
 import '../../providers/race_provider.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'widgets/result_poster_widget.dart';
 
 class DayResultsScreen extends StatefulWidget {
   final Race race;
@@ -24,6 +30,8 @@ class DayResultsScreen extends StatefulWidget {
 }
 
 class _DayResultsScreenState extends State<DayResultsScreen> {
+  final ScreenshotController _screenshotController = ScreenshotController();
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +57,90 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
         builder: (context) => BullDetailScreen(bull: bull),
       ),
     );
+  }
+
+  Future<void> _shareResult(RaceResult result) async {
+    File? tempFile;
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppTheme.primaryOrange),
+        ),
+      );
+
+      final imageBytes = await _screenshotController.captureFromWidget(
+        Container(
+          color: Colors.transparent,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              devicePixelRatio: 1.0,
+              textScaleFactor: 1.0,
+            ),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: RaceResultPoster(
+                result: result,
+                race: widget.race,
+                day: widget.day,
+              ),
+            ),
+          ),
+        ),
+        delay: const Duration(milliseconds: 2000),
+        pixelRatio: 8.0,
+      );
+
+      // Hide loading indicator
+      if (mounted) Navigator.pop(context);
+
+      if (kIsWeb) {
+        // Web: Use XFile.fromData to avoid file system access
+        await Share.shareXFiles(
+          [XFile.fromData(
+            imageBytes,
+            mimeType: 'image/png',
+            name: 'race_result_${result.id}.png'
+          )],
+          text: 'Check out this race result on Naad Bailgada! 🐂💨',
+        );
+      } else {
+        // Mobile: Save to temp file
+        final directory = await getTemporaryDirectory();
+        tempFile = await File('${directory.path}/race_result_${result.id}.png').create();
+        await tempFile.writeAsBytes(imageBytes);
+
+        await Share.shareXFiles(
+          [XFile(tempFile.path)],
+          text: 'Check out this race result on Naad Bailgada! 🐂💨',
+        );
+
+        // Clean up temporary file after sharing
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      }
+    } catch (e) {
+      // Hide loading indicator if showing
+      if (mounted && Navigator.canPop(context)) Navigator.pop(context);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to share result: $e')),
+        );
+      }
+    } finally {
+      // Ensure temp file is cleaned up even if an error occurs
+      if (tempFile != null && await tempFile.exists()) {
+        try {
+          await tempFile.delete();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+    }
   }
 
   @override
@@ -221,6 +313,11 @@ class _DayResultsScreenState extends State<DayResultsScreen> {
                   ),
                 ),
                 const Spacer(),
+                IconButton(
+                  onPressed: () => _shareResult(result),
+                  icon: Icon(Icons.share_outlined, size: 20, color: Colors.grey.shade700),
+                  tooltip: 'Share Result',
+                ),
                 if (!result.isDisqualified)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
